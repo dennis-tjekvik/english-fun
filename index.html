@@ -263,6 +263,24 @@ textarea{width:100%; min-height:90px; font:inherit; font-size:.8rem; padding:10p
 .celebrate .card{background:var(--surface); border-radius:30px; padding:26px 30px; text-align:center; animation:pop .3s; max-width:420px}
 .celebrate .ic{font-size:5rem; line-height:1}
 #confetti{position:fixed; inset:0; pointer-events:none; z-index:70}
+/* sig det højt */
+.saybox{margin:12px auto 0; max-width:520px; background:var(--surface); border:3px solid var(--grape); border-radius:22px; padding:14px 16px; color:var(--ink)}
+.saytxt{font-size:1.15rem; font-weight:800}
+.saytxt b{font-family:"Baloo 2",sans-serif; font-size:1.5rem; color:var(--grape)}
+.mic{display:inline-flex; align-items:center; gap:8px; margin-top:10px; background:var(--grape); color:#fff; border-radius:999px; padding:14px 26px; font-weight:800; font-size:1.25rem; box-shadow:0 5px 0 rgba(0,0,0,.22)}
+.mic:disabled{opacity:.45}
+.mic.listening{background:var(--berry); animation:pulse 1s infinite}
+@keyframes pulse{50%{transform:scale(1.06)}}
+.saynote{min-height:1.3em; color:var(--muted); font-size:.98rem; margin-top:8px}
+.saymsg{font-size:1.25rem; font-weight:800; color:var(--muted); margin-bottom:6px}
+.saymsg.good{color:var(--leaf)}
+.saybox .row-btns{margin-top:6px}
+.opts.wait .opt{opacity:.45}
+.sayhint{display:flex; gap:12px; align-items:center; margin-top:14px; background:color-mix(in srgb,var(--grape) 12%,var(--surface)); border:3px solid var(--grape); border-radius:22px; padding:12px 16px; font-weight:700}
+.sayhint .ic{font-size:2rem}
+.howto{text-align:left; display:grid; gap:10px; margin:12px 0}
+.howto div{display:flex; gap:10px; align-items:flex-start}
+.howto span{font-size:1.6rem; line-height:1}
 @media (max-width:480px){ .slot{width:38px;height:48px;font-size:1.5rem;border-radius:10px} .letter{width:44px;height:50px;font-size:1.6rem} .slots,.letters{gap:6px} }
 @media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important} }
 </style>
@@ -406,7 +424,7 @@ const spellable = w => /^[a-z]+$/i.test(w.en) && w.en.length<=9;
 const KEY = "englishfun-v2";
 function fresh(){ return {v:2, name:"", xp:0, pts:0, words:{}, stages:{}, streak:{n:0,last:-99}, days:{}, badges:{},
   log:[], rewards:DEFAULT_REWARDS.map(r=>({...r})), cap:0, pin:null, mission:null, best:{speed:0},
-  stats:{math:0, combo:0, missions:0}, sound:true, backupAt:0, created:Date.now()}; }
+  stats:{math:0, combo:0, missions:0, said:0, sayAsk:0}, sound:true, mic:true, howto:false, speedDay:-1, backupAt:0, created:Date.now()}; }
 let S = fresh();
 try{
   const raw = localStorage.getItem(KEY);
@@ -509,10 +527,39 @@ let voice=null;
 function findVoice(){ try{ const vs=speechSynthesis.getVoices();
   voice = vs.find(v=>/en-GB/i.test(v.lang)&&/Google/i.test(v.name)) || vs.find(v=>/en-GB/i.test(v.lang)) || vs.find(v=>/^en/i.test(v.lang)) || null; }catch(e){} }
 if("speechSynthesis" in window){ findVoice(); speechSynthesis.onvoiceschanged=findVoice; }
-function speak(text, rate){
-  try{ if(!("speechSynthesis" in window)) return; speechSynthesis.cancel();
+function speak(text, rate, onend){
+  let called=false; const end=()=>{ if(!called){ called=true; if(onend) onend(); } };
+  try{ if(!("speechSynthesis" in window)){ setTimeout(end,600); return; } speechSynthesis.cancel();
     const u=new SpeechSynthesisUtterance(text); u.lang = voice ? voice.lang : "en-GB"; if(voice) u.voice=voice; u.rate = rate||0.85;
-    speechSynthesis.speak(u); }catch(e){}
+    u.onend=end; u.onerror=end; speechSynthesis.speak(u);
+    if(onend) setTimeout(end, 900 + text.length*110);
+  }catch(e){ setTimeout(end,600); }
+}
+
+/* tale-genkendelse (Chrome sender lyden til Googles tjeneste) */
+const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+let micDenied = false;
+const micOn = () => !!SR && S.mic && !micDenied;
+function normSay(t){ return norm(t).replace(/\d+/g,n=>+n<=100?numWord(+n):n).replace(/-/g," ").replace(/[^a-zæøå' ]/g," ").replace(/\s+/g," ").trim(); }
+function sayMatch(heard, expected){
+  const h=normSay(heard).split(" ").filter(Boolean), e=normSay(expected).split(" ").filter(Boolean);
+  if(!h.length) return false;
+  const close=(a,b)=>a===b || lev(a,b)<=Math.max(1,Math.round(b.length/3));
+  if(e.length<=2) return close(h.join(" "),e.join(" ")) || e.every(w=>h.some(x=>close(x,w)));
+  return e.filter(w=>h.some(x=>close(x,w))).length/e.length >= 0.6;
+}
+function listenFor(expected, cb){
+  let done=false, r=null;
+  const fin=(ok,heard)=>{ if(done) return; done=true; try{ r&&r.abort(); }catch(e){} cb(ok,heard); };
+  try{
+    r=new SR(); r.lang="en-GB"; r.interimResults=false; r.maxAlternatives=5; r.continuous=false;
+    r.onresult=e=>{ const alts=[...e.results[0]].map(a=>a.transcript); fin(alts.some(a=>sayMatch(a,expected)), alts[0]||""); };
+    r.onerror=e=>{ if(e.error==="not-allowed"||e.error==="service-not-allowed"||e.error==="audio-capture"){ micDenied=true; fin(null,""); } else fin(false,""); };
+    r.onend=()=>fin(false,"");
+    r.start();
+  }catch(e){ micDenied=true; fin(null,""); }
+  setTimeout(()=>fin(false,""), 8000);
+  return ()=>{ done=true; try{ r&&r.abort(); }catch(e){} };
 }
 
 /* ================= UI PRIMITIVES ================= */
@@ -617,6 +664,7 @@ function home(){
       <span><b>${M.done?"Mission klaret!":"Dagens mission"}</b>
       <small>${M.done?"Kom igen i morgen og hold din 🔥 i live. Du kan stadig spille videre.":"Cirka 10 minutter · "+(M.started?"trin "+(M.step+1)+" af 3":"start nu")+" · +bonus 🪙"}</small></span>
     </button>
+    <div class="sayhint"><span class="ic">🗣️</span><span>Sig alle ord og sætninger <b>HØJT</b>. Halvdelen af pointene får du for at sige dem${micOn()?" i mikrofonen 🎤":""}.</span></div>
     <div class="tiles4">
       <button class="tile-btn" id="map"><span class="ic">🗺️</span><span><b>Worlds</b><small>Verdener og baner</small></span></button>
       <button class="tile-btn" id="arcade"><span class="ic">🕹️</span><span><b>Arcade</b><small>Bonusspil</small></span></button>
@@ -633,6 +681,16 @@ function home(){
   $("#trophies").onclick=()=>go(trophies);
   $("#parent").onclick=()=>parentGate(()=>go(parent));
   KEYH=e=>{ if(e.key==="Enter") go(missionScreen); };
+  if(!S.howto) howto();
+}
+function howto(){
+  modal(`<div class="ic">🗣️</div><h3>Sådan får du flest point</h3><div class="howto">
+    <div><span>👂</span><p style="margin:0"><b>Lyt og læs først.</b> Knapperne åbner, når ordet er sagt.</p></div>
+    <div><span>✅</span><p style="margin:0"><b>Svar rigtigt i første forsøg.</b> Så får du point.</p></div>
+    <div><span>🎤</span><p style="margin:0"><b>Sig det HØJT bagefter.</b> Det giver lige så mange point en gang til – og din 🔥 combo vokser.</p></div>
+    <div><span>🐢</span><p style="margin:0"><b>Gæt ikke.</b> Et forkert svar, der er gættet for hurtigt, koster 1 point.</p></div>
+    </div><div class="row"><button class="play" style="padding:12px 24px" data-o>Forstået! 👍</button></div>`,
+    (m,close)=>{ m.querySelector("[data-o]").onclick=()=>{ S.howto=true; save(); close(); }; });
 }
 
 function welcome(){
@@ -666,7 +724,7 @@ function missionScreen(){
   ];
   const skipWarm = M.step>0 && !M.didWarm;
   app.innerHTML = topBar("Hjem") + `<h2>🚀 Today's mission</h2>
-    <p class="sub">Tre korte trin, cirka 10 minutter. Klar dem alle og få bonuspoint og en 🔥 mere.</p>
+    <p class="sub">Tre korte trin, cirka 10 minutter. Sig alle ord og sætninger højt 🗣️ – klar dem alle og få bonuspoint og en 🔥 mere.</p>
     <div class="path">${steps.map((s,i)=>{ const st = M.done||i<M.step ? "ok" : i===M.step ? "now" : "";
       const label = i===0 && skipWarm ? "Ingen ord at gentage endnu" : s.da;
       return `<div class="step ${st}"><span class="n">${st==="ok"?"✓":s.ic}</span><div><b>${esc(s.en)}</b><br><small>${label} · ca. ${s.min} min</small></div></div>`; }).join("")}
@@ -757,20 +815,65 @@ function runRound(cfg){
       tick(); const d=dayRec(); d.n++; if(q===2) d.ok++;
       if(en) srs(en,q);
       let p = q===2 ? cfg.per : q===1 ? 1 : 0;
-      if(q===2){ R.perfect++; R.combo++; R.best=Math.max(R.best,R.combo); if(R.combo>(S.stats.combo||0)) S.stats.combo=R.combo; } else R.combo=0;
+      R.lastQ=q;
+      if(q===2) R.perfect++; else R.combo=0;
       if(cfg.kind==="math" && q===2) S.stats.math++;
-      if(q===2 && R.combo>0 && R.combo%5===0){ p+=5; const c=R.combo; setTimeout(()=>{ SFX.combo(); toast(`🔥 ${c} i træk! +5 bonus`); },250); }
-      const g=award(p); R.earned+=g;
-      const c=app.querySelector(".combo"); if(c){ c.textContent="🔥"+R.combo; c.classList.toggle("on",R.combo>=3); }
-      const gn=app.querySelector(".gain"); if(gn) gn.textContent=`+${R.earned} 🪙`;
+      const g=award(p); R.earned+=g; api.hud();
       if(g>0) floatMsg("+"+g+" 🪙", app.querySelector(".prompt"));
       return g;
     },
-    wait(ms){
-      const fb=$("#fb"); const b=document.createElement("button"); b.className="pill-btn nextbtn"; b.textContent="Næste ▶"; fb.appendChild(b);
-      const nx=()=>{ R.i++; go(next); };
-      b.onclick=nx; KEYH=e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); nx(); } };
-      later(nx, ms);
+    hud(){
+      const c=app.querySelector(".combo"); if(c){ c.textContent="🔥"+R.combo; c.classList.toggle("on",R.combo>=3); }
+      const gn=app.querySelector(".gain"); if(gn) gn.textContent=`+${R.earned} 🪙`;
+    },
+    penalty(){
+      if(S.pts>0){ S.pts--; const d=dayRec(); d.guess=(d.guess||0)+1; R.earned=Math.max(0,R.earned-1); save(); hudUpdate(); api.hud(); return 1; }
+      return 0;
+    },
+    /* efter rigtigt svar: sig ordet/sætningen højt. Det giver lige så mange point som selve svaret. */
+    sayStep(text){
+      const fb=$("#fb"), bonus=cfg.per; let tries=0, finished=false, stop=null;
+      const d=dayRec(); d.sayAsk=(d.sayAsk||0)+1; S.stats.sayAsk++;
+      const box=document.createElement("div"); box.className="saybox"; fb.appendChild(box);
+      const nx=()=>{ if(stop) stop(); R.i++; go(next); };
+      const finish=(pts,msg,ok)=>{
+        finished=true; if(stop) stop();
+        if(ok){ d.said=(d.said||0)+1; S.stats.said++;
+          if(R.lastQ===2){ R.combo++; R.best=Math.max(R.best,R.combo); if(R.combo>(S.stats.combo||0)) S.stats.combo=R.combo;
+            if(R.combo%5===0){ pts+=5; const c=R.combo; setTimeout(()=>{ SFX.combo(); toast(`🔥 ${c} i træk! +5 bonus`); },250); } } }
+        const g=award(pts); R.earned+=g; api.hud();
+        box.innerHTML=`<div class="saymsg ${ok?"good":""}">${msg}${g?` +${g} 🪙`:""}</div><button class="play nextbtn" style="padding:12px 24px" id="nx">Næste ▶</button>`;
+        $("#nx").onclick=nx; box.scrollIntoView({block:"nearest", behavior:"smooth"});
+        KEYH=e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); nx(); } };
+      };
+      const render=note=>{
+        const mic=micOn();
+        box.innerHTML=`<div class="saytxt">🗣️ Sig det højt: <b>${esc(text)}</b></div>
+          <button class="mic" id="mic" ${mic?"":"disabled"}>${mic?"🎤 Tryk – og sig det":"🗣️ Jeg har sagt det højt"}</button>
+          <div class="saynote" id="sn">${note||""}</div>
+          <div class="row-btns"><button class="pill-btn" id="again">🔊 Hør igen</button><button class="linkish" id="skip">Spring over (ingen point)</button></div>`;
+        $("#again").onclick=()=>speak(text, text.includes(" ")?0.75:0.8);
+        $("#skip").onclick=()=>{ R.combo=0; nx(); };
+        const btn=$("#mic");
+        if(mic){
+          btn.onclick=()=>{ if(finished||btn.classList.contains("listening")) return;
+            try{ speechSynthesis.cancel(); }catch(e){}
+            btn.classList.add("listening"); btn.textContent="🎙️ Jeg lytter … sig det nu"; $("#sn").textContent="";
+            stop=listenFor(text,(ok,heard)=>{ if(finished) return; stop=null;
+              if(ok===null) return render("Mikrofonen virker ikke her – brug knappen, når du har sagt det højt.");
+              if(ok){ SFX.ok(); return finish(bonus,"🌟 Perfekt sagt!",true); }
+              tries++;
+              if(tries>=3) return finish(1,"💪 Godt forsøg! Det bliver lettere, jo mere du øver.",false);
+              SFX.bad(); render(heard?`Jeg hørte “${esc(heard)}”. Prøv igen – tal tydeligt 🙂`:"Jeg hørte ikke noget. Tryk og sig det lidt højere."); });
+          };
+        } else {
+          setTimeout(()=>{ if(!finished && btn.isConnected) btn.disabled=false; }, 1500);
+          btn.onclick=()=>finish(Math.ceil(bonus/2),"👍 Godt!",true);
+        }
+        KEYH=e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); if(!btn.disabled) btn.click(); } };
+        box.scrollIntoView({block:"nearest", behavior:"smooth"});
+      };
+      render();
     }
   };
   function next(){
@@ -783,20 +886,30 @@ function runRound(cfg){
 function mc(api, o){
   let first=true;
   api.frame(o.top + `<div class="opts ${o.three?"three":""}">${o.options.map((x,n)=>`<button class="opt ${o.emoji?"emoji":""}" data-n="${n}" aria-label="${esc(o.aria?o.aria(x):o.label(x))}"><kbd>${n+1}</kbd>${o.label(x)}</button>`).join("")}</div><p class="feedback" id="fb"></p>`);
-  const btns=[...app.querySelectorAll(".opt")], fb=$("#fb");
+  const btns=[...app.querySelectorAll(".opt")], fb=$("#fb"), grid=app.querySelector(".opts");
+  const wrongs=new Set(); let t0=0, isReady=false, solved=false;
+  const ready=()=>{ if(isReady||solved||!grid.isConnected) return; isReady=true; t0=Date.now(); grid.classList.remove("wait"); btns.forEach((b,n)=>{ if(!wrongs.has(n)) b.disabled=false; }); };
+  grid.classList.add("wait"); btns.forEach(b=>b.disabled=true);
   if(o.onShow) o.onShow();
+  if(o.audio){ speak(o.audio, null, ()=>setTimeout(ready,250)); setTimeout(ready,3500); } else setTimeout(ready, o.readMs||900);
   const pick=n=>{
-    const b=btns[n]; if(!b||b.disabled) return; const x=o.options[n];
+    const b=btns[n]; if(!b||b.disabled||!isReady) return; const x=o.options[n];
     if(o.isRight(x)){
-      btns.forEach(y=>y.disabled=true); b.classList.add("right"); SFX.ok();
+      solved=true; btns.forEach(y=>y.disabled=true); b.classList.add("right"); SFX.ok();
       api.answer(first?2:0, o.en);
       fb.className="feedback good"; fb.innerHTML=`${rand(PRAISE)} ${o.right?`<small>${o.right()}</small>`:""}`;
       if(o.say) o.say();
-      KEYH=null; api.wait(o.ms||1700);
+      KEYH=null; api.sayStep(o.sayText);
     } else {
-      first=false; b.classList.add("wrong"); b.disabled=true; SFX.bad();
-      fb.className="feedback bad"; fb.innerHTML=`Prøv igen! ${o.wrong?`<small>${o.wrong(x)}</small>`:"<small>Det klarer du!</small>"}`;
+      const fast = Date.now()-t0 < 1500;
+      first=false; wrongs.add(n); b.classList.add("wrong"); SFX.bad();
+      const lost = fast ? api.penalty() : 0;
+      fb.className="feedback bad";
+      fb.innerHTML = lost ? `🐢 For hurtigt gættet: −1 🪙 <small>${o.wrong?o.wrong(x)+" · ":""}Lyt og læs først – så går det bedre</small>`
+                          : `Prøv igen! ${o.wrong?`<small>${o.wrong(x)}</small>`:"<small>Det klarer du!</small>"}`;
       if(o.onWrong) o.onWrong();
+      isReady=false; grid.classList.add("wait"); btns.forEach(y=>y.disabled=true);
+      setTimeout(ready, 1600);
     }
   };
   btns.forEach((b,n)=>b.onclick=()=>pick(n));
@@ -807,19 +920,19 @@ const ITEM = {
   pic2word(it,api){ const w=it.w; introduce(w.en); const opts=pickOpts(w,poolFor(w),4,"en");
     mc(api,{top:`<div class="prompt"><div class="pic" aria-hidden="true">${pic(w.pic)}</div><p class="sub" style="margin:4px 0 0">Hvad hedder det på engelsk?</p></div>`,
       options:opts, label:x=>esc(x.en), isRight:x=>x.en===w.en, en:w.en,
-      right:()=>`${esc(w.en)} = ${esc(w.da)}`, wrong:x=>`${esc(x.en)} betyder ${esc(x.da)} ${pic(x.pic)}`, say:()=>speak(w.en)}); },
+      right:()=>`${esc(w.en)} = ${esc(w.da)}`, wrong:x=>`${esc(x.en)} betyder ${esc(x.da)} ${pic(x.pic)}`, say:()=>speak(w.en), sayText:w.en}); },
   listen2pic(it,api){ const w=it.w; introduce(w.en); const opts=pickOpts(w,poolFor(w),4,"pic");
     mc(api,{top:`<div class="prompt"><p class="sub" style="margin:0">Lyt og tryk på det rigtige billede</p><button class="speak huge" id="say">🔊 Listen</button></div>`,
       options:opts, emoji:true, label:x=>pic(x.pic), aria:x=>x.da, isRight:x=>x.en===w.en, en:w.en,
-      right:()=>`${esc(w.en)} = ${esc(w.da)}`, wrong:x=>`Det var ${esc(x.en)}. Lyt igen 🔊`,
-      onShow:()=>{ $("#say").onclick=()=>speak(w.en); speak(w.en); }, onWrong:()=>setTimeout(()=>speak(w.en),600), say:()=>speak(w.en)}); },
+      right:()=>`${esc(w.en)} = ${esc(w.da)}`, wrong:x=>`Det var ${esc(x.en)}. Lyt igen 🔊`, audio:w.en,
+      onShow:()=>{ $("#say").onclick=()=>speak(w.en); }, onWrong:()=>setTimeout(()=>speak(w.en),600), say:()=>speak(w.en), sayText:w.en}); },
   listen2word(it,api){ const w=it.w; introduce(w.en);
     const pool=poolFor(w).filter(x=>x.en!==w.en).sort((a,b)=>Math.abs(a.en.length-w.en.length)-Math.abs(b.en.length-w.en.length)+(Math.random()-.5)*3);
     const opts=pickOpts(w,pool.slice(0,6),4,"en");
     mc(api,{top:`<div class="prompt"><p class="sub" style="margin:0">Lyt – hvilket ord hører du?</p><button class="speak huge" id="say">🔊 Listen</button></div>`,
       options:opts, label:x=>esc(x.en), isRight:x=>x.en===w.en, en:w.en,
-      right:()=>`${pic(w.pic)} ${esc(w.en)} = ${esc(w.da)}`, wrong:x=>`Det står der ${esc(x.en)} (${esc(x.da)})`,
-      onShow:()=>{ $("#say").onclick=()=>speak(w.en); speak(w.en); }, onWrong:()=>setTimeout(()=>speak(w.en),600), say:()=>speak(w.en)}); },
+      right:()=>`${pic(w.pic)} ${esc(w.en)} = ${esc(w.da)}`, wrong:x=>`Det står der ${esc(x.en)} (${esc(x.da)})`, audio:w.en,
+      onShow:()=>{ $("#say").onclick=()=>speak(w.en); }, onWrong:()=>setTimeout(()=>speak(w.en),600), say:()=>speak(w.en), sayText:w.en}); },
   spell(it,api){ const w=it.w; introduce(w.en);
     const target=w.en.toUpperCase().split("");
     let letters=shuffle(target), t=0; while(letters.join("")===target.join("") && target.length>1 && t++<10) letters=shuffle(target);
@@ -829,8 +942,8 @@ const ITEM = {
         <button class="speak" id="say">🔊 Listen</button></div>
         <p class="sub" style="text-align:center;margin:0">Stav ordet – tryk på bogstaverne eller skriv på tastaturet</p>
         <div class="slots ${state||""}">${target.map((_,n)=>`<div class="slot ${picked[n]!==undefined?"filled":""}">${picked[n]!==undefined?letters[picked[n]]:""}</div>`).join("")}</div>
-        <div class="letters">${letters.map((l,n)=>`<button class="letter ${picked.includes(n)?"used":""}" data-n="${n}" aria-label="${l}">${l}</button>`).join("")}</div>
-        <div class="row-btns"><button class="pill-btn" id="undo">⌫ Slet</button><button class="pill-btn" id="hint">💡 Hjælp</button></div>
+        ${state==="ok"?"":`<div class="letters">${letters.map((l,n)=>`<button class="letter ${picked.includes(n)?"used":""}" data-n="${n}" aria-label="${l}">${l}</button>`).join("")}</div>
+        <div class="row-btns"><button class="pill-btn" id="undo">⌫ Slet</button><button class="pill-btn" id="hint">💡 Hjælp</button></div>`}
         <p class="feedback" id="fb"></p>`);
       $("#say").onclick=()=>speak(w.en);
       if(locked) return;
@@ -852,7 +965,7 @@ const ITEM = {
         locked=true; draw("ok"); app.querySelectorAll(".letter,#undo,#hint").forEach(x=>x.disabled=true); SFX.ok();
         api.answer(first&&!hinted?2:(first?1:0), w.en);
         const fb=$("#fb"); fb.className="feedback good"; fb.innerHTML=`${rand(PRAISE)}<small>${esc(w.en)} = ${esc(w.da)}</small>`;
-        speak(w.en); KEYH=null; api.wait(1700);
+        speak(w.en); KEYH=null; api.sayStep(w.en);
       } else {
         first=false; SFX.bad(); draw("no");
         const fb=$("#fb"); fb.className="feedback bad"; fb.innerHTML=`Næsten! Prøv igen.<small>Lyt godt efter 🔊 – eller tryk på 💡</small>`;
@@ -878,7 +991,7 @@ const ITEM = {
         const q = reveal ? 0 : (tries===0 && hints===0 ? 2 : 1);
         api.answer(q, w.en);
         fb.className="feedback good"; fb.innerHTML=`${q===2?rand(PRAISE):"Godt!"}<small>${esc(w.en)} = ${esc(w.da)}</small>`;
-        speak(w.en); KEYH=null; api.wait(1700); return;
+        speak(w.en); KEYH=null; api.sayStep(w.en); return;
       }
       tries++; SFX.bad(); inp.classList.remove("no"); void inp.offsetWidth; inp.classList.add("no");
       if(!reveal && lev(g,a)===1 && tries<3){ fb.className="feedback bad"; fb.innerHTML=`Næsten! Kun ét bogstav er forkert.<small>Prøv igen</small>`; }
@@ -899,7 +1012,7 @@ const ITEM = {
       <div class="sentence">${shown}</div><p class="sub" style="margin:8px 0 0">Hvilket ord passer?</p></div>`,
       three:true, options, label:x=>esc(x), isRight:x=>x===s.blank, en:WMAP[s.blank]?s.blank:null,
       right:()=>{ const b=$("#bl"); if(b){ b.textContent=s.blank; b.style.color="var(--leaf)"; b.style.borderColor="var(--leaf)"; } return `🇩🇰 ${esc(s.da)}`; },
-      wrong:x=>WMAP[x]?`${esc(x)} betyder ${esc(WMAP[x].da)}`:"Læs sætningen højt for dig selv", say:()=>speak(s.en), ms:2600});
+      wrong:x=>WMAP[x]?`${esc(x)} betyder ${esc(WMAP[x].da)}`:"Læs sætningen højt for dig selv", say:()=>speak(s.en,0.75), sayText:s.en, readMs:1800});
   },
   build(it,api){ const s=it.s;
     const tokens=s.en.split(" "); let tiles=shuffle(tokens.map((t,i)=>({t,i}))); let tt=0;
@@ -911,8 +1024,8 @@ const ITEM = {
         <div class="da" style="font-size:1.3rem">🇩🇰 ${esc(s.da)}</div>
         <p class="sub" style="margin:6px 0 0">Byg sætningen på engelsk – tryk på ordene i rigtig rækkefølge</p></div>
         <div class="wslots ${state||""}">${picked.map((n,k)=>`<button class="wt placed" data-k="${k}">${esc(tiles[n].t)}</button>`).join("")}</div>
-        <div class="wtiles">${tiles.map((x,n)=>`<button class="wt ${picked.includes(n)?"used":""}" data-n="${n}">${esc(x.t)}</button>`).join("")}</div>
-        <div class="row-btns"><button class="pill-btn" id="undo">⌫ Slet</button><button class="pill-btn" id="say">🔊 Lyt</button></div>
+        ${state==="ok"?`<button id="say" hidden></button>`:`<div class="wtiles">${tiles.map((x,n)=>`<button class="wt ${picked.includes(n)?"used":""}" data-n="${n}">${esc(x.t)}</button>`).join("")}</div>
+        <div class="row-btns"><button class="pill-btn" id="undo">⌫ Slet</button><button class="pill-btn" id="say">🔊 Lyt</button></div>`}
         <p class="feedback" id="fb"></p>`);
       $("#say").onclick=()=>speak(s.en,0.75);
       if(locked) return;
@@ -926,7 +1039,7 @@ const ITEM = {
         locked=true; draw("ok"); app.querySelectorAll(".wt,#undo").forEach(x=>x.disabled=true); SFX.ok();
         api.answer(first?2:0, WMAP[s.blank]?s.blank:null);
         const fb=$("#fb"); fb.className="feedback good"; fb.innerHTML=`${rand(PRAISE)}<small>${esc(s.en)}</small>`;
-        speak(s.en); KEYH=null; api.wait(2600);
+        speak(s.en,0.75); KEYH=null; api.sayStep(s.en);
       } else {
         first=false; SFX.bad(); draw("no");
         let ok=0; while(ok<picked.length && key(tiles[picked[ok]].t)===key(tokens[ok])) ok++;
@@ -940,11 +1053,11 @@ const ITEM = {
     if(m.words){
       mc(api,{top:`<div class="prompt"><p class="sub" style="margin:0">What is …?</p><div class="q">${esc(m.qWords)}?</div><button class="speak" id="say">🔊 Listen</button></div>`,
         options:m.opts, label:x=>String(x), isRight:x=>x===m.ans, right:()=>`${esc(m.qWords)} is ${numWord(m.ans)}`,
-        wrong:x=>`${x} = ${numWord(x)}`, onShow:()=>{ $("#say").onclick=()=>speak(m.qWords); speak(m.qWords); }, say:()=>speak(m.qWords+" is "+numWord(m.ans)), ms:2000});
+        wrong:x=>`${x} = ${numWord(x)}`, audio:m.qWords, onShow:()=>{ $("#say").onclick=()=>speak(m.qWords); }, say:()=>speak(m.qWords+" is "+numWord(m.ans)), sayText:numWord(m.ans)});
     } else {
       mc(api,{top:`<div class="prompt"><p class="sub" style="margin:0">Vælg svaret på engelsk</p><div class="q" style="font-size:clamp(2.4rem,9vw,3.4rem)">${m.qDigits} = ?</div></div>`,
         options:m.opts, three:false, label:x=>numWord(x), isRight:x=>x===m.ans, right:()=>`${m.ans} = ${numWord(m.ans)}`,
-        wrong:x=>`${numWord(x)} = ${x}`, say:()=>speak(numWord(m.ans)), ms:2000});
+        wrong:x=>`${numWord(x)} = ${x}`, say:()=>speak(numWord(m.ans)), sayText:numWord(m.ans), readMs:1400});
     }
   }
 };
@@ -1014,7 +1127,7 @@ function showResult(o){
 }
 
 function learnCards(W, list, after, isIntro){
-  let i=0, flipped=false;
+  let i=0, flipped=false, nextOk=false; const saidOk=[];
   function draw(){
     const w=list[i];
     app.innerHTML = topBar(isIntro?null:"Tilbage") + `<h2>${W.ic} ${isIntro?"Nye ord!":W.en}</h2>
@@ -1023,7 +1136,9 @@ function learnCards(W, list, after, isIntro){
         <div class="pic" aria-hidden="true">${pic(w.pic)}</div><div class="word">${esc(w.en)}</div>
         ${flipped?`<div class="da">🇩🇰 ${esc(w.da)}</div>`:`<div class="sub" style="margin:6px 0 0">Tryk for at se det på dansk</div>`}
       </button>
-      <div style="text-align:center"><button class="speak" id="say">🔊 Listen</button></div>
+      <div style="text-align:center"><button class="speak" id="say">🔊 Listen</button>
+        ${micOn()?`<button class="mic" id="cmic" style="margin-left:8px">${saidOk[i]?"✅ Godt sagt!":"🎤 Sig det"}</button>`:""}
+        <div class="saynote" id="cn">${saidOk[i]?"":"🗣️ Sig ordet højt, før du går videre"}</div></div>
       <div class="top" style="margin-top:16px">
         <button class="pill-btn" id="prev" ${i===0?"disabled":""}>◀</button>
         <span class="xptext">${i+1} / ${list.length}</span>
@@ -1031,9 +1146,18 @@ function learnCards(W, list, after, isIntro){
     if(!isIntro) bindBack(after);
     $("#card").onclick=()=>{ flipped=!flipped; draw(); };
     $("#say").onclick=()=>speak(w.en);
-    const prev=()=>{ if(i>0){ i--; flipped=false; draw(); speak(list[i].en); } };
-    const next=()=>{ introduce(w.en); tick();
-      if(i<list.length-1){ i++; flipped=false; draw(); speak(list[i].en); }
+    const cm=$("#cmic");
+    if(cm) cm.onclick=()=>{ if(cm.classList.contains("listening")) return; try{speechSynthesis.cancel();}catch(e){}
+      cm.classList.add("listening"); cm.textContent="🎙️ Jeg lytter …";
+      listenFor(w.en,(ok,heard)=>{ if(list[i]!==w) return;
+        if(ok){ saidOk[i]=true; SFX.ok(); }
+        draw();
+        const c=$("#cn"); if(!ok && c) c.textContent = ok===null ? "Mikrofonen virker ikke her – sig det bare højt" : heard ? `Jeg hørte “${heard}”. Prøv igen 🙂` : "Jeg hørte ikke noget – prøv igen"; }); };
+    const nb=$("#next"); if(!nextOk){ nb.disabled=true; setTimeout(()=>{ nextOk=true; if(nb.isConnected) nb.disabled=false; },1400); }
+    const show=k=>{ i=k; flipped=false; nextOk=false; draw(); speak(list[i].en); };
+    const prev=()=>{ if(i>0) show(i-1); };
+    const next=()=>{ if(!nextOk) return; introduce(w.en); tick();
+      if(i<list.length-1){ show(i+1); }
       else { list.forEach(x=>introduce(x.en)); save(); if(isIntro) award(list.length); after(); } };
     $("#prev").onclick=prev; $("#next").onclick=next;
     KEYH=e=>{ if(e.key==="ArrowRight"||e.key==="Enter") next(); else if(e.key==="ArrowLeft") prev(); else if(e.key===" "){ e.preventDefault(); flipped=!flipped; draw(); } };
@@ -1078,7 +1202,7 @@ function arcade(){
   app.innerHTML = topBar("Hjem") + `<h2>🕹️ Arcade</h2><p class="sub">Bonusspil. Slå din egen rekord!</p>
     <div class="stages">
       <button class="stage" id="g-math"><span class="ic">🧮</span><span class="grow"><b>Math in English</b><br><small class="xptext">Regnestykker på engelsk · ${S.stats.math} klaret</small></span></button>
-      <button class="stage" id="g-speed" ${seenPool().length<6?"disabled":""}><span class="ic">⚡</span><span class="grow"><b>Speed round</b><br><small class="xptext">${seenPool().length<6?"Lær først nogle ord på kortet":"60 sekunder · rekord: "+S.best.speed}</small></span></button>
+      <button class="stage" id="g-speed" ${seenPool().length<6?"disabled":""}><span class="ic">⚡</span><span class="grow"><b>Speed round</b><br><small class="xptext">${seenPool().length<6?"Lær først nogle ord på kortet":"60 sekunder · rekord: "+S.best.speed+(S.speedDay===DAY()?" · point igen i morgen (ny rekord giver +5)":"")}</small></span></button>
       <button class="stage" id="g-build"><span class="ic">🧩</span><span class="grow"><b>Sentence builder</b><br><small class="xptext">Byg sætninger fra dine verdener</small></span></button>
       <button class="stage" id="g-hard" ${hard?"":"disabled"}><span class="ic">🎯</span><span class="grow"><b>My tricky words</b><br><small class="xptext">${hard?"Øv de ord, du tit tager fejl af":"Ingen svære ord endnu – flot!"}</small></span></button>
     </div>`;
@@ -1123,7 +1247,8 @@ function speedRound(onEnd){
     const left=end-Date.now(); const bar=$("#tbar"); if(bar) bar.style.width=Math.max(0,left/LEN*100)+"%";
     if(left<=0 && !done){ done=true; clearInterval(INTERVAL); KEYH=null; tick();
       const record = n>S.best.speed; if(record) S.best.speed=n;
-      const earned=award(Math.ceil(n/2)); if(record){ confetti(); SFX.up(); } save(); checkBadges();
+      const firstToday = S.speedDay!==DAY(); S.speedDay=DAY();
+      const earned=award((firstToday?Math.ceil(n/2):0) + (record?5:0)); if(record){ confetti(); SFX.up(); } save(); checkBadges();
       onEnd({n, earned, record}); }
   },100);
 }
@@ -1189,10 +1314,12 @@ function parent(){
     const intro=Object.keys(S.words).length;
     const week=days.reduce((a,d)=>a+(S.days[d]?.sec||0),0)/60;
     const n=days.reduce((a,d)=>a+(S.days[d]?.n||0),0), ok=days.reduce((a,d)=>a+(S.days[d]?.ok||0),0);
+    const said=days.reduce((a,d)=>a+(S.days[d]?.said||0),0), ask=days.reduce((a,d)=>a+(S.days[d]?.sayAsk||0),0), guess=days.reduce((a,d)=>a+(S.days[d]?.guess||0),0);
     body=`<div class="panel"><h3>${esc(S.name)} lige nu</h3><div class="kv">
       <div><b>🪙 ${S.pts}</b><small>point at bruge</small></div><div><b>Lv ${lvlOf(S.xp)}</b><small>${S.xp} XP i alt</small></div>
       <div><b>🔥 ${S.streak.last>=d0-1?S.streak.n:0}</b><small>dage i træk</small></div><div><b>${mastered()} / ${intro}</b><small>ord lært / mødt</small></div>
       <div><b>${Math.round(week)} min</b><small>de sidste 7 dage</small></div><div><b>${n?Math.round(ok/n*100):0} %</b><small>rigtige i 1. forsøg (7 dage)</small></div>
+      <div><b>${ask?Math.round(said/ask*100):0} %</b><small>sagt højt (${said} af ${ask}, 7 dage)</small></div><div><b>${guess}</b><small>for hurtige gæt (7 dage)</small></div>
       <div><b>${S.stats.missions}</b><small>missioner i alt</small></div><div><b>${openWorlds().length} / ${WORLDS.length}</b><small>verdener åbne</small></div></div></div>
       <div class="panel"><h3>Minutter pr. dag</h3><div class="bars">${days.map(d=>{ const m=(S.days[d]?.sec||0)/60; const dt=new Date(d*864e5);
         return `<div class="b"><em>${Math.round(m)}</em><i style="height:${m/maxMin*85}%"></i><span>${wd[dt.getUTCDay()]}</span></div>`; }).join("")}</div>
@@ -1207,6 +1334,8 @@ function parent(){
   if(ptab==="points"){
     body=`<div class="panel"><h3>Point-loft pr. dag</h3><p class="note">0 = intet loft (standard). Sæt et tal, hvis I vil begrænse point pr. dag. XP er altid ubegrænset. Baner, der allerede er klaret med 3 ★, giver halve point, så det ikke kan betale sig at farme lette baner.</p>
       <div class="field"><input class="num" type="number" min="0" id="cap" value="${S.cap}"><button class="btn" id="saveCap">Gem</button></div></div>
+      <div class="panel"><h3>Mikrofon</h3><p class="note">Når mikrofonen er slået til, tjekker appen, at han siger ordet højt. Chrome sender lyden til Googles talegenkendelse. Uden mikrofon trykker han selv “Jeg har sagt det højt” og får halve point for det. ${SR?"":"<b>Denne browser understøtter ikke talegenkendelse.</b>"}</p>
+        <div class="field"><label><input type="checkbox" id="micT" ${S.mic?"checked":""}> Brug mikrofonen</label></div></div>
       <div class="panel"><h3>Giv eller træk point</h3><div class="field"><input class="num" type="number" id="adj" placeholder="fx 20 eller -20"><input class="name" id="adjn" placeholder="Hvorfor? (fx flot lektie)"><button class="btn" id="doAdj">OK</button></div></div>
       <div class="panel"><h3>Historik</h3><div class="loglist">${S.log.length?S.log.slice(0,30).map(l=>`<div><span>${new Date(l.t).toLocaleDateString("da-DK")} · ${l.type==="redeem"?"🎁 ":"✏️ "}${esc(l.note||"")}</span><b>${l.n>0?"+":""}${l.n}</b></div>`).join(""):`<p class="note">Intet endnu.</p>`}</div></div>`;
   }
@@ -1231,6 +1360,7 @@ function parent(){
     $("#saveR").onclick=()=>{ collect(); S.rewards=S.rewards.filter(r=>r.name); save(); toast("Gemt ✓"); parent(); };
   }
   if(ptab==="points"){
+    $("#micT").onchange=e=>{ S.mic=e.target.checked; micDenied=false; save(); toast(S.mic?"Mikrofon slået til 🎤":"Mikrofon slået fra"); };
     $("#saveCap").onclick=()=>{ S.cap=Math.max(0,parseInt($("#cap").value,10)||0); save(); toast("Gemt ✓"); };
     $("#doAdj").onclick=()=>{ const n=parseInt($("#adj").value,10); if(!n) return; S.pts=Math.max(0,S.pts+n); if(n>0) S.xp+=n;
       S.log.unshift({t:Date.now(), type:"adj", n, note:$("#adjn").value.trim()||"Justering"}); save(); toast(`${n>0?"+":""}${n} 🪙`); parent(); };
