@@ -405,7 +405,7 @@ const spellable = w => /^[a-z]+$/i.test(w.en) && w.en.length<=9;
 /* ================= STATE ================= */
 const KEY = "englishfun-v2";
 function fresh(){ return {v:2, name:"", xp:0, pts:0, words:{}, stages:{}, streak:{n:0,last:-99}, days:{}, badges:{},
-  log:[], rewards:DEFAULT_REWARDS.map(r=>({...r})), cap:150, pin:null, mission:null, best:{speed:0},
+  log:[], rewards:DEFAULT_REWARDS.map(r=>({...r})), cap:0, pin:null, mission:null, best:{speed:0},
   stats:{math:0, combo:0, missions:0}, sound:true, backupAt:0, created:Date.now()}; }
 let S = fresh();
 try{
@@ -418,6 +418,16 @@ try{
 }catch(e){}
 let storageOK = true;
 function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); storageOK=true; }catch(e){ storageOK=false; } }
+/* v2.1: dagsloftet er fjernet som standard; giv point tilbage, der blev holdt tilbage af det gamle loft på 150 */
+let refunded = 0;
+if(!S.capFix){
+  if(S.cap===150){
+    S.cap=0;
+    Object.values(S.days).forEach(d=>{ const m=Math.max(0,(d.xp||0)-(d.pts||0)); if(m){ refunded+=m; d.pts+=m; } });
+    if(refunded){ S.pts+=refunded; S.log.unshift({t:Date.now(), type:"adj", n:refunded, note:"Point tilbage fra det gamle dagsloft"}); }
+  }
+  S.capFix=1; save();
+}
 try{ if(navigator.storage && navigator.storage.persist) navigator.storage.persist(); }catch(e){}
 
 function dayRec(d){ d = d ?? DAY(); return S.days[d] || (S.days[d]={pts:0,xp:0,sec:0,n:0,ok:0}); }
@@ -443,7 +453,7 @@ function award(n){
   if(n<=0) return 0;
   const d=dayRec(), before=lvlOf(S.xp);
   S.xp += n; d.xp += n;
-  const g = Math.min(n, Math.max(0, S.cap - d.pts));
+  const g = S.cap>0 ? Math.min(n, Math.max(0, S.cap - d.pts)) : n;
   S.pts += g; d.pts += g;
   if(g<n && !capWarned){ capWarned=true; toast("Du har nået dagens point-loft 🪙 Du får stadig XP!"); }
   const after=lvlOf(S.xp);
@@ -969,7 +979,7 @@ function startStage(wi,s,fromMission){
   const fresh=W.list.filter(w=>!S.words[w.en]);
   if(s===0 && fresh.length) return learnCards(W, fresh, ()=>go(()=>startStage(wi,s,fromMission)), true);
   const old=stars(wi,s);
-  runRound({title:W.en, items:stageItems(wi,s), per:STAGES[s].per, onDone:R=>{
+  runRound({title:W.en, items:stageItems(wi,s), per: old===3 ? Math.ceil(STAGES[s].per/2) : STAGES[s].per, onDone:R=>{
     const total=8, ratio=R.perfect/total;
     const st = ratio>=.85?3 : ratio>=.6?2 : ratio>=.4?1 : 0;
     setStars(wi,s,st);
@@ -1051,7 +1061,7 @@ function worldScreen(wi){
   app.innerHTML = topBar("Kortet") + `<h2>${W.ic} ${esc(W.en)}</h2><p class="sub">${esc(W.da)} · ${W.list.length} ord</p>
     <div class="stages">${STAGES.map((S0,s)=>{ const open=stageOpen(wi,s), st=stars(wi,s);
       return `<button class="stage" data-s="${s}" ${open?"":"disabled"}><span class="ic">${open?S0.ic:"🔒"}</span>
-        <span class="grow"><b>Bane ${s+1} · ${S0.en}</b><br><small class="xptext">${S0.da} · ${S0.per} 🪙 pr. rigtigt</small></span>
+        <span class="grow"><b>Bane ${s+1} · ${S0.en}</b><br><small class="xptext">${S0.da} · ${st===3?`${Math.ceil(S0.per/2)} 🪙 pr. rigtigt (klaret med 3 ★)`:`${S0.per} 🪙 pr. rigtigt`}</small></span>
         <span class="stars3">${"★".repeat(st)}<span style="opacity:.25">${"★".repeat(3-st)}</span></span></button>`; }).join("")}</div>
     <button class="pill-btn" id="learn">📚 Se og hør alle ordene</button>
     <h3 style="margin:18px 0 8px">Ordene</h3>
@@ -1195,8 +1205,8 @@ function parent(){
       <div class="field"><button class="btn ghost" id="add">+ Tilføj</button><button class="btn" id="saveR">Gem</button></div></div>`;
   }
   if(ptab==="points"){
-    body=`<div class="panel"><h3>Point-loft pr. dag</h3><p class="note">Højst så mange point pr. dag (XP er ubegrænset). Det forhindrer, at han “farmer” point på lette baner.</p>
-      <div class="field"><input class="num" type="number" min="10" id="cap" value="${S.cap}"><button class="btn" id="saveCap">Gem</button></div></div>
+    body=`<div class="panel"><h3>Point-loft pr. dag</h3><p class="note">0 = intet loft (standard). Sæt et tal, hvis I vil begrænse point pr. dag. XP er altid ubegrænset. Baner, der allerede er klaret med 3 ★, giver halve point, så det ikke kan betale sig at farme lette baner.</p>
+      <div class="field"><input class="num" type="number" min="0" id="cap" value="${S.cap}"><button class="btn" id="saveCap">Gem</button></div></div>
       <div class="panel"><h3>Giv eller træk point</h3><div class="field"><input class="num" type="number" id="adj" placeholder="fx 20 eller -20"><input class="name" id="adjn" placeholder="Hvorfor? (fx flot lektie)"><button class="btn" id="doAdj">OK</button></div></div>
       <div class="panel"><h3>Historik</h3><div class="loglist">${S.log.length?S.log.slice(0,30).map(l=>`<div><span>${new Date(l.t).toLocaleDateString("da-DK")} · ${l.type==="redeem"?"🎁 ":"✏️ "}${esc(l.note||"")}</span><b>${l.n>0?"+":""}${l.n}</b></div>`).join(""):`<p class="note">Intet endnu.</p>`}</div></div>`;
   }
@@ -1221,7 +1231,7 @@ function parent(){
     $("#saveR").onclick=()=>{ collect(); S.rewards=S.rewards.filter(r=>r.name); save(); toast("Gemt ✓"); parent(); };
   }
   if(ptab==="points"){
-    $("#saveCap").onclick=()=>{ S.cap=Math.max(10,parseInt($("#cap").value,10)||150); save(); toast("Gemt ✓"); };
+    $("#saveCap").onclick=()=>{ S.cap=Math.max(0,parseInt($("#cap").value,10)||0); save(); toast("Gemt ✓"); };
     $("#doAdj").onclick=()=>{ const n=parseInt($("#adj").value,10); if(!n) return; S.pts=Math.max(0,S.pts+n); if(n>0) S.xp+=n;
       S.log.unshift({t:Date.now(), type:"adj", n, note:$("#adjn").value.trim()||"Justering"}); save(); toast(`${n>0?"+":""}${n} 🪙`); parent(); };
   }
@@ -1252,6 +1262,7 @@ async function readCode(c){
 /* ================= START ================= */
 document.addEventListener("visibilitychange",()=>{ if(document.hidden){ save(); lastAct=0; } });
 home();
+if(refunded) setTimeout(()=>{ SFX.coin(); confetti(); celebrate("🪙",`+${refunded} point!`,"Du har fået de point tilbage, som loftet holdt tilbage."); hudUpdate(); }, 500);
 </script>
 </body>
 </html>
