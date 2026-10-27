@@ -1,0 +1,1257 @@
+<!DOCTYPE html>
+<html lang="da">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>English Fun</title>
+<meta name="description" content="Lær engelsk med en lille mission hver dag. Saml point og løn dem ind hos mor og far.">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="English Fun">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;800&family=Nunito:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#E8F4FF; --surface:#FFFFFF; --surface2:#F3F8FF; --ink:#1E2B4F; --muted:#56638A; --line:#C6D8F0;
+  --sky:#2F7FE8; --grape:#7350F0; --berry:#E8456F; --leaf:#1F9A60; --sun:#FFC93C; --fire:#FF7A1A;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#111A31; --surface:#1B2647; --surface2:#16203D; --ink:#EEF2FF; --muted:#A9B4D4; --line:#2F3C66;
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#111A31; --surface:#1B2647; --surface2:#16203D; --ink:#EEF2FF; --muted:#A9B4D4; --line:#2F3C66;
+  color-scheme:dark;
+}
+*,*::before,*::after{box-sizing:border-box}
+body{
+  margin:0; background:var(--bg); color:var(--ink);
+  font-family:Nunito,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font-weight:600; font-size:17px; -webkit-tap-highlight-color:transparent;
+  padding:env(safe-area-inset-top,0px) 0 env(safe-area-inset-bottom,0px);
+}
+main{max-width:760px; margin:0 auto; padding:16px 16px 48px}
+h1,h2,h3,.display{font-family:"Baloo 2",Nunito,system-ui,sans-serif; font-weight:800}
+h2{font-size:clamp(1.8rem,6vw,2.4rem); line-height:1.05; margin:4px 0 4px}
+h3{margin:0; font-size:1.3rem; line-height:1.1}
+.sub{color:var(--muted); margin:0 0 16px; font-size:1.05rem}
+button{font:inherit; color:inherit; cursor:pointer; border:0; background:none; touch-action:manipulation}
+button:focus-visible,input:focus-visible{outline:4px solid var(--sky); outline-offset:3px}
+button:disabled{cursor:default}
+input{font:inherit; color:var(--ink)}
+kbd{font-family:Nunito,sans-serif; font-size:.75rem; font-weight:800; color:var(--muted); border:2px solid var(--line); border-radius:7px; padding:0 6px; position:absolute; top:8px; left:10px}
+
+/* top bar */
+.top{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:16px; min-height:46px}
+.top .right{display:flex; gap:8px; align-items:center}
+.pill-btn{background:var(--surface); border:2px solid var(--line); border-radius:999px; padding:9px 16px; font-weight:800}
+.pill-btn:disabled{opacity:.4}
+.chip{background:var(--surface); border:2px solid var(--line); border-radius:999px; padding:7px 13px; font-weight:800; white-space:nowrap}
+.chip.coins{background:var(--sun); border-color:var(--sun); color:#1E2B4F}
+
+/* home */
+.hello{display:flex; align-items:center; gap:14px; margin:4px 0 16px}
+.hello h1{font-size:clamp(2.2rem,8vw,3.2rem); line-height:1; margin:0}
+.player{background:var(--surface); border:3px solid var(--line); border-radius:26px; padding:16px 18px; display:flex; gap:16px; align-items:center}
+.lvl{flex:none; width:74px; height:74px; border-radius:50%; background:var(--grape); color:#fff; display:grid; place-items:center; text-align:center; line-height:1; box-shadow:0 5px 0 rgba(0,0,0,.2)}
+.lvl small{display:block; font-size:.75rem; opacity:.9}
+.lvl b{font-family:"Baloo 2",sans-serif; font-size:2rem}
+.player .info{flex:1; min-width:0}
+.xpbar{height:14px; background:var(--surface2); border:2px solid var(--line); border-radius:999px; overflow:hidden; margin:8px 0 4px}
+.xpbar i{display:block; height:100%; background:linear-gradient(90deg,var(--grape),var(--sky)); border-radius:999px; transition:width .4s}
+.xptext{color:var(--muted); font-size:.9rem}
+.stats{display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-top:12px}
+.stat{background:var(--surface); border:3px solid var(--line); border-radius:20px; padding:10px 8px; text-align:center}
+.stat b{display:block; font-family:"Baloo 2",sans-serif; font-size:1.7rem; line-height:1.1}
+.stat small{color:var(--muted); font-size:.85rem}
+
+.mission-btn{display:flex; width:100%; align-items:center; gap:16px; text-align:left; margin-top:16px; padding:20px 22px; border-radius:28px; color:#fff; background:linear-gradient(135deg,var(--leaf),#18b27a); box-shadow:0 7px 0 rgba(0,0,0,.22); transition:transform .08s, box-shadow .08s}
+.mission-btn:active{transform:translateY(4px); box-shadow:0 3px 0 rgba(0,0,0,.22)}
+.mission-btn .ic{font-size:3rem; line-height:1}
+.mission-btn b{display:block; font-family:"Baloo 2",sans-serif; font-size:1.8rem; line-height:1.05}
+.mission-btn small{display:block; font-size:1rem; opacity:.95}
+.mission-btn.done{background:linear-gradient(135deg,#5a6b9a,#7a89b8)}
+
+.tiles4{display:grid; grid-template-columns:1fr 1fr; gap:12px; margin-top:14px}
+.tile-btn{background:var(--surface); border:3px solid var(--line); border-radius:22px; padding:14px; text-align:left; display:flex; gap:12px; align-items:center; box-shadow:0 5px 0 var(--line)}
+.tile-btn:active{transform:translateY(3px); box-shadow:0 2px 0 var(--line)}
+.tile-btn .ic{font-size:2.2rem; line-height:1}
+.tile-btn b{display:block; font-family:"Baloo 2",sans-serif; font-size:1.3rem; line-height:1.05}
+.tile-btn small{color:var(--muted); font-size:.9rem}
+.foot{display:flex; justify-content:space-between; align-items:center; gap:10px; margin-top:22px; color:var(--muted); font-size:.9rem; flex-wrap:wrap}
+.linkish{color:var(--muted); text-decoration:underline; font-weight:800; padding:6px 2px}
+
+/* mission path */
+.path{display:grid; gap:12px; margin:8px 0 18px}
+.step{display:flex; gap:14px; align-items:center; background:var(--surface); border:3px solid var(--line); border-radius:22px; padding:14px 16px}
+.step .n{flex:none; width:48px; height:48px; border-radius:50%; display:grid; place-items:center; font-size:1.5rem; background:var(--surface2); border:3px solid var(--line)}
+.step.now{border-color:var(--leaf); box-shadow:0 0 0 4px color-mix(in srgb,var(--leaf) 25%,transparent)}
+.step.now .n{background:var(--leaf); border-color:var(--leaf); color:#fff}
+.step.ok .n{background:var(--sun); border-color:var(--sun)}
+.step.ok{opacity:.75}
+.step small{color:var(--muted)}
+.big-go{display:block; width:100%; background:var(--leaf); color:#fff; border-radius:999px; padding:18px; font-family:"Baloo 2",sans-serif; font-weight:800; font-size:1.6rem; box-shadow:0 6px 0 rgba(0,0,0,.2)}
+.big-go:active{transform:translateY(3px); box-shadow:0 3px 0 rgba(0,0,0,.2)}
+.big-go.alt{background:var(--sky)}
+
+/* worlds */
+.worlds{display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:12px}
+.world{position:relative; background:var(--surface); border:3px solid var(--line); border-radius:22px; padding:14px 10px 12px; text-align:center}
+.world .ic{font-size:2.4rem; display:block; line-height:1.15}
+.world b{display:block; font-family:"Baloo 2",sans-serif; font-size:1.2rem; line-height:1.1}
+.world small{color:var(--muted); display:block}
+.world .st{margin-top:6px; letter-spacing:1px; font-size:.95rem}
+.world.locked{opacity:.55}
+.world.locked .ic{filter:grayscale(1)}
+.world .lock{position:absolute; top:8px; right:10px}
+.world.next{border-color:var(--leaf)}
+.stages{display:grid; gap:12px; margin:8px 0 16px}
+.stage{display:flex; gap:14px; align-items:center; text-align:left; background:var(--surface); border:3px solid var(--line); border-radius:22px; padding:14px 16px; box-shadow:0 5px 0 var(--line)}
+.stage:active:not(:disabled){transform:translateY(3px); box-shadow:0 2px 0 var(--line)}
+.stage:disabled{opacity:.5; box-shadow:none}
+.stage .ic{font-size:2.2rem}
+.stage .grow{flex:1}
+.stage .stars3{font-size:1.3rem; white-space:nowrap}
+.wordlist{display:flex; flex-wrap:wrap; gap:8px}
+.wl{background:var(--surface); border:2px solid var(--line); border-radius:999px; padding:5px 12px; font-size:.95rem}
+.wl i{font-style:normal; margin-left:4px; color:var(--sun)}
+
+/* round */
+.rhead{display:flex; align-items:center; gap:10px; margin-bottom:14px}
+.rhead .progress{flex:1; margin:0}
+.progress{height:14px; background:var(--surface); border:2px solid var(--line); border-radius:999px; overflow:hidden}
+.progress i{display:block; height:100%; background:var(--leaf); border-radius:999px; transition:width .3s}
+.combo{font-weight:800; min-width:3.2em; text-align:center; color:var(--muted)}
+.combo.on{color:var(--fire); transform:scale(1.15)}
+.gain{font-weight:800; background:var(--sun); color:#1E2B4F; border-radius:999px; padding:4px 10px; white-space:nowrap}
+
+.prompt{background:var(--surface); border:3px solid var(--line); border-radius:28px; padding:18px; text-align:center; margin-bottom:14px}
+.pic{font-size:clamp(4rem,15vh,7rem); line-height:1.1}
+.picTxt{display:inline-block; font-family:"Baloo 2",sans-serif; font-weight:800; font-size:.55em; background:var(--surface2); border:3px solid var(--line); border-radius:24px; padding:4px 24px; line-height:1.2}
+.prompt .word{font-family:"Baloo 2",sans-serif; font-weight:800; font-size:clamp(2.2rem,9vw,3.2rem); line-height:1.05}
+.prompt .da{color:var(--muted); font-size:1.2rem; margin-top:4px}
+.prompt .sentence{font-family:"Baloo 2",sans-serif; font-weight:800; font-size:clamp(1.6rem,6vw,2.3rem); line-height:1.2; margin-top:6px}
+.blank{display:inline-block; min-width:3em; border-bottom:5px solid var(--sky); color:var(--sky)}
+.prompt .q{font-family:"Baloo 2",sans-serif; font-weight:800; font-size:clamp(1.8rem,7vw,2.6rem); line-height:1.15}
+
+.speak{background:var(--sky); color:#fff; border-radius:999px; padding:12px 24px; font-weight:800; font-size:1.2rem; box-shadow:0 5px 0 rgba(0,0,0,.2); margin-top:10px}
+.speak:active{transform:translateY(3px); box-shadow:0 2px 0 rgba(0,0,0,.2)}
+.speak.huge{font-size:1.6rem; padding:20px 34px}
+
+.opts{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.opts.three{grid-template-columns:1fr}
+@media (min-width:560px){ .opts.three{grid-template-columns:repeat(3,1fr)} }
+.opt{position:relative; background:var(--surface); border:3px solid var(--line); border-radius:22px; min-height:86px; padding:12px; font-family:"Baloo 2",sans-serif; font-weight:800; font-size:1.6rem; line-height:1.1; box-shadow:0 5px 0 var(--line)}
+.opt.emoji{font-size:3.2rem}
+.opt.emoji .picTxt{font-size:1.4rem; border:0; background:none; padding:0}
+.opt:active:not(:disabled){transform:translateY(3px); box-shadow:0 2px 0 var(--line)}
+.opt.right{background:var(--leaf); border-color:var(--leaf); color:#fff; box-shadow:none}
+.opt.right kbd,.opt.wrong kbd{color:#fff; border-color:rgba(255,255,255,.6)}
+.opt.wrong{background:var(--berry); border-color:var(--berry); color:#fff; opacity:.7; box-shadow:none; animation:shake .35s}
+@keyframes shake{25%{transform:translateX(-7px)}75%{transform:translateX(7px)}}
+
+.feedback{min-height:3.4em; text-align:center; font-size:1.25rem; font-weight:800; margin:14px 0 0}
+.feedback.good{color:var(--leaf)}
+.feedback.bad{color:var(--berry)}
+.feedback small{display:block; color:var(--muted); font-weight:700; font-size:1rem}
+.feedback .nextbtn{margin-top:8px}
+
+.slots,.letters{display:flex; flex-wrap:wrap; justify-content:center; gap:8px; margin:12px 0}
+.slot{width:50px; height:58px; border-radius:14px; border:3px dashed var(--line); display:grid; place-items:center; font-family:"Baloo 2",sans-serif; font-weight:800; font-size:1.9rem}
+.slot.filled{border-style:solid; border-color:var(--sky); background:var(--surface)}
+.slots.ok .slot{border-color:var(--leaf); background:var(--leaf); color:#fff}
+.slots.no{animation:shake .35s}
+.letter{width:54px; height:58px; border-radius:14px; background:var(--grape); color:#fff; font-family:"Baloo 2",sans-serif; font-weight:800; font-size:1.9rem; box-shadow:0 5px 0 rgba(0,0,0,.25)}
+.letter:active{transform:translateY(3px); box-shadow:0 2px 0 rgba(0,0,0,.25)}
+.letter.used{visibility:hidden}
+.row-btns{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:6px}
+
+.typebox{display:flex; gap:10px; justify-content:center; flex-wrap:wrap}
+.typebox input{width:min(100%,340px); font-family:"Baloo 2",sans-serif; font-weight:800; font-size:2rem; text-align:center; padding:10px 14px; border-radius:18px; border:3px solid var(--line); background:var(--surface)}
+.typebox input.ok{border-color:var(--leaf); color:var(--leaf)}
+.typebox input.no{border-color:var(--berry); animation:shake .35s}
+.check{background:var(--leaf); color:#fff; border-radius:18px; padding:12px 22px; font-weight:800; font-size:1.3rem; box-shadow:0 5px 0 rgba(0,0,0,.2)}
+
+.wslots{min-height:70px; display:flex; flex-wrap:wrap; gap:8px; justify-content:center; padding:10px; border:3px dashed var(--line); border-radius:20px; margin:10px 0}
+.wslots.ok{border-color:var(--leaf); border-style:solid}
+.wslots.no{border-color:var(--berry); animation:shake .35s}
+.wtiles{display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin:8px 0}
+.wt{background:var(--grape); color:#fff; border-radius:14px; padding:10px 16px; font-family:"Baloo 2",sans-serif; font-weight:800; font-size:1.5rem; box-shadow:0 5px 0 rgba(0,0,0,.25)}
+.wt.placed{background:var(--sky)}
+.wt.used{visibility:hidden}
+
+.timer{height:18px; background:var(--surface); border:2px solid var(--line); border-radius:999px; overflow:hidden; flex:1}
+.timer i{display:block; height:100%; background:var(--fire); border-radius:999px}
+.speedcount{font-family:"Baloo 2",sans-serif; font-weight:800; font-size:1.6rem; min-width:2.5em; text-align:right}
+
+/* results */
+.end{text-align:center; padding-top:16px}
+.end .bigstar{font-size:5.5rem; line-height:1}
+.end .stars-big{font-size:3.2rem; letter-spacing:6px; margin:6px 0}
+.end h2{font-size:clamp(2.2rem,8vw,3.2rem)}
+.end .row{display:flex; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:22px}
+.end .row button{font-size:1.2rem; padding:14px 22px}
+.play{background:var(--leaf); color:#fff; border-radius:999px; font-weight:800; box-shadow:0 5px 0 rgba(0,0,0,.2)}
+.summary{display:inline-grid; grid-template-columns:auto auto; gap:6px 18px; text-align:left; background:var(--surface); border:3px solid var(--line); border-radius:20px; padding:14px 20px; margin-top:10px}
+
+/* shop */
+.rewards{display:grid; gap:12px}
+.reward{display:flex; align-items:center; gap:14px; background:var(--surface); border:3px solid var(--line); border-radius:22px; padding:14px 16px}
+.reward .ic{font-size:2.2rem}
+.reward .grow{flex:1; min-width:0}
+.reward .progress{height:10px; margin-top:6px}
+.reward .progress i{background:var(--sun)}
+.reward button{flex:none}
+.buy{background:var(--sun); color:#1E2B4F; border-radius:999px; padding:10px 16px; font-weight:800; box-shadow:0 4px 0 rgba(0,0,0,.2)}
+.buy:disabled{background:var(--surface2); color:var(--muted); box-shadow:none}
+
+/* badges */
+.badges{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:12px}
+.badge{background:var(--surface); border:3px solid var(--line); border-radius:22px; padding:14px 10px; text-align:center}
+.badge .ic{font-size:2.6rem; display:block}
+.badge b{display:block; font-family:"Baloo 2",sans-serif; font-size:1.1rem}
+.badge small{color:var(--muted)}
+.badge.off .ic{filter:grayscale(1); opacity:.35}
+.badge.off b{color:var(--muted)}
+
+/* parent */
+.panel{background:var(--surface); border:3px solid var(--line); border-radius:22px; padding:16px; margin-bottom:14px}
+.panel h3{margin-bottom:10px}
+.kv{display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:10px}
+.kv div{background:var(--surface2); border-radius:14px; padding:10px}
+.kv b{display:block; font-family:"Baloo 2",sans-serif; font-size:1.5rem}
+.kv small{color:var(--muted)}
+.bars{display:grid; grid-template-columns:repeat(7,1fr); gap:6px; align-items:end; height:120px; margin-top:6px}
+.bars .b{display:flex; flex-direction:column; align-items:center; justify-content:flex-end; height:100%; font-size:.75rem; color:var(--muted)}
+.bars .b i{display:block; width:70%; background:var(--sky); border-radius:6px 6px 0 0; min-height:2px}
+.bars .b span{margin-top:4px}
+.bars .b em{font-style:normal; font-weight:800; color:var(--ink)}
+.field{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin:6px 0}
+.field input{padding:9px 12px; border-radius:12px; border:2px solid var(--line); background:var(--surface2); min-width:0}
+.field input.name{flex:1 1 180px}
+.field input.num{width:90px}
+.btn{background:var(--sky); color:#fff; border-radius:12px; padding:9px 14px; font-weight:800}
+.btn.ghost{background:var(--surface2); color:var(--ink); border:2px solid var(--line)}
+.btn.danger{background:var(--berry)}
+textarea{width:100%; min-height:90px; font:inherit; font-size:.8rem; padding:10px; border-radius:12px; border:2px solid var(--line); background:var(--surface2); color:var(--ink); word-break:break-all}
+.loglist{display:grid; gap:6px; font-size:.95rem}
+.loglist div{display:flex; justify-content:space-between; gap:10px; border-bottom:1px solid var(--line); padding:4px 0}
+.note{color:var(--muted); font-size:.92rem}
+.tabs{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px}
+.tabs button{background:var(--surface); border:2px solid var(--line); border-radius:999px; padding:8px 14px; font-weight:800}
+.tabs button.on{background:var(--ink); color:var(--bg); border-color:var(--ink)}
+
+/* modal, toast, confetti */
+.modal-bg{position:fixed; inset:0; background:rgba(10,15,35,.55); display:grid; place-items:center; padding:16px; z-index:50}
+.modal{background:var(--surface); color:var(--ink); border-radius:26px; padding:22px; width:min(100%,420px); text-align:center; box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.modal .ic{font-size:3.5rem}
+.modal .row{display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top:16px}
+.modal input{font-family:"Baloo 2",sans-serif; font-size:1.8rem; text-align:center; letter-spacing:8px; width:200px; padding:8px; border-radius:14px; border:3px solid var(--line); background:var(--surface2); margin-top:8px}
+.modal input.wide{letter-spacing:0; width:100%; font-size:1.4rem}
+.toasts{position:fixed; left:50%; bottom:calc(16px + env(safe-area-inset-bottom,0px)); transform:translateX(-50%); display:grid; gap:8px; z-index:60; width:min(92vw,420px); pointer-events:none}
+.toast{background:var(--ink); color:var(--bg); border-radius:18px; padding:12px 16px; font-weight:800; text-align:center; box-shadow:0 8px 24px rgba(0,0,0,.25); animation:pop .25s}
+@keyframes pop{from{transform:translateY(12px); opacity:0}}
+.float{position:fixed; z-index:55; font-family:"Baloo 2",sans-serif; font-weight:800; font-size:1.6rem; color:var(--leaf); pointer-events:none; animation:floatUp 1.1s forwards; text-shadow:0 2px 0 var(--surface)}
+@keyframes floatUp{to{transform:translateY(-60px); opacity:0}}
+.celebrate{position:fixed; inset:0; display:grid; place-items:center; z-index:58; background:rgba(10,15,35,.45); padding:16px}
+.celebrate .card{background:var(--surface); border-radius:30px; padding:26px 30px; text-align:center; animation:pop .3s; max-width:420px}
+.celebrate .ic{font-size:5rem; line-height:1}
+#confetti{position:fixed; inset:0; pointer-events:none; z-index:70}
+@media (max-width:480px){ .slot{width:38px;height:48px;font-size:1.5rem;border-radius:10px} .letter{width:44px;height:50px;font-size:1.6rem} .slots,.letters{gap:6px} }
+@media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important} }
+</style>
+</head>
+<body>
+<main id="app" aria-live="polite"></main>
+<div class="toasts" id="toasts"></div>
+<canvas id="confetti"></canvas>
+
+<script>
+"use strict";
+/* ================= CONTENT ================= */
+// words: [english, dansk, billede]   sents: [english, dansk, ord-der-mangler, billede, (valgmuligheder)]
+const WORLDS = [
+ {id:"colors", en:"Colors", da:"Farver", ic:"🎨", words:[
+  ["red","rød","🔴"],["blue","blå","🔵"],["green","grøn","🟢"],["yellow","gul","🟡"],["black","sort","⚫"],
+  ["white","hvid","⚪"],["orange","orange","🟠"],["purple","lilla","🟣"],["brown","brun","🟤"]],
+  sents:[["The sky is blue.","Himlen er blå.","blue","🌤️"],["I have a red car.","Jeg har en rød bil.","red","🚗"],
+  ["The grass is green.","Græsset er grønt.","green","🌱"],["My cat is black.","Min kat er sort.","black","🐈‍⬛"]]},
+ {id:"animals", en:"Animals", da:"Dyr", ic:"🐾", words:[
+  ["dog","hund","🐶"],["cat","kat","🐱"],["horse","hest","🐴"],["bird","fugl","🐦"],["fish","fisk","🐟"],
+  ["cow","ko","🐮"],["pig","gris","🐷"],["mouse","mus","🐭"],["lion","løve","🦁"],["duck","and","🦆"],
+  ["rabbit","kanin","🐰"],["elephant","elefant","🐘"],["monkey","abe","🐵"],["sheep","får","🐑"]],
+  sents:[["I have a dog.","Jeg har en hund.","dog","🐶"],["The cat is sleeping.","Katten sover.","cat","🐱"],
+  ["A fish can swim.","En fisk kan svømme.","fish","🐟"],["The lion is big.","Løven er stor.","lion","🦁"]]},
+ {id:"numbers", en:"Numbers 1–20", da:"Tal 1–20", ic:"🔢", words:[
+  ["one","en","1"],["two","to","2"],["three","tre","3"],["four","fire","4"],["five","fem","5"],
+  ["six","seks","6"],["seven","syv","7"],["eight","otte","8"],["nine","ni","9"],["ten","ti","10"],
+  ["eleven","elleve","11"],["twelve","tolv","12"],["thirteen","tretten","13"],["fourteen","fjorten","14"],["fifteen","femten","15"],
+  ["sixteen","seksten","16"],["seventeen","sytten","17"],["eighteen","atten","18"],["nineteen","nitten","19"],["twenty","tyve","20"]],
+  sents:[["I am ten years old.","Jeg er ti år gammel.","ten","🧒"],["I have two hands.","Jeg har to hænder.","two","🙌"],
+  ["A week has seven days.","En uge har syv dage.","seven","📅"],["I can count to twenty.","Jeg kan tælle til tyve.","twenty","🔢"]]},
+ {id:"food", en:"Food", da:"Mad", ic:"🍎", words:[
+  ["apple","æble","🍎"],["banana","banan","🍌"],["bread","brød","🍞"],["milk","mælk","🥛"],["egg","æg","🥚"],
+  ["cheese","ost","🧀"],["pizza","pizza","🍕"],["cake","kage","🍰"],["carrot","gulerod","🥕"],["water","vand","💧"],
+  ["ice cream","is","🍦"],["chicken","kylling","🍗"],["potato","kartoffel","🥔"],["strawberry","jordbær","🍓"]],
+  sents:[["I like pizza.","Jeg kan lide pizza.","pizza","🍕"],["I eat an apple.","Jeg spiser et æble.","apple","🍎"],
+  ["Can I have some water?","Må jeg få noget vand?","water","💧"],["The cake is good.","Kagen er god.","cake","🍰"]]},
+ {id:"body", en:"My body", da:"Min krop", ic:"🙋", words:[
+  ["hand","hånd","✋"],["foot","fod","🦶"],["eye","øje","👁️"],["ear","øre","👂"],["nose","næse","👃"],
+  ["mouth","mund","👄"],["leg","ben","🦵"],["arm","arm","💪"],["tooth","tand","🦷"],["hair","hår","💇"],["finger","finger","☝️"]],
+  sents:[["I have two eyes.","Jeg har to øjne.","eyes","👀"],["Wash your hands.","Vask dine hænder.","hands","🙌"],
+  ["My nose is cold.","Min næse er kold.","nose","👃"],["I have long hair.","Jeg har langt hår.","hair","💇"]]},
+ {id:"home", en:"My home", da:"Mit hjem", ic:"🏠", words:[
+  ["chair","stol","🪑"],["bed","seng","🛏️"],["door","dør","🚪"],["window","vindue","🪟"],["book","bog","📖"],
+  ["cup","kop","☕"],["clock","ur","⏰"],["key","nøgle","🔑"],["sofa","sofa","🛋️"],["lamp","lampe","💡"],
+  ["toilet","toilet","🚽"],["bath","badekar","🛁"]],
+  sents:[["This is my bed.","Det her er min seng.","bed","🛏️"],["Close the door, please.","Luk døren, tak.","door","🚪"],
+  ["Where is my key?","Hvor er min nøgle?","key","🔑"],["The book is on the sofa.","Bogen ligger på sofaen.","book","📖"]]},
+ {id:"family", en:"Family", da:"Familie", ic:"👪", words:[
+  ["mother","mor","👩"],["father","far","👨"],["sister","søster","👧"],["brother","bror","👦"],["baby","baby","👶"],
+  ["grandmother","bedstemor","👵"],["grandfather","bedstefar","👴"],["family","familie","👨‍👩‍👦"],["friend","ven","🧑‍🤝‍🧑"]],
+  sents:[["She is my sister.","Hun er min søster.","is","👧",["is","am","are"]],["I am ten years old.","Jeg er ti år gammel.","am","🧒",["am","is","are"]],
+  ["We are friends.","Vi er venner.","are","🧑‍🤝‍🧑",["are","is","am"]],["My mother is nice.","Min mor er sød.","mother","👩"],
+  ["I love my family.","Jeg elsker min familie.","family","👨‍👩‍👦"]]},
+ {id:"school", en:"School", da:"Skole", ic:"🏫", words:[
+  ["pencil","blyant","✏️"],["pen","kuglepen","🖊️"],["notebook","hæfte","📓"],["bag","taske","🎒"],["ruler","lineal","📏"],
+  ["scissors","saks","✂️"],["teacher","lærer","🧑‍🏫"],["computer","computer","💻"],["paper","papir","📄"],["school","skole","🏫"],["crayon","farvekridt","🖍️"]],
+  sents:[["I have a pencil.","Jeg har en blyant.","pencil","✏️"],["My bag is blue.","Min taske er blå.","bag","🎒"],
+  ["The teacher is nice.","Læreren er sød.","teacher","🧑‍🏫"],["Can I use the computer?","Må jeg bruge computeren?","computer","💻"]]},
+ {id:"clothes", en:"Clothes", da:"Tøj", ic:"👕", words:[
+  ["shirt","trøje","👕"],["trousers","bukser","👖"],["dress","kjole","👗"],["shoes","sko","👟"],["cap","kasket","🧢"],
+  ["socks","sokker","🧦"],["jacket","jakke","🧥"],["gloves","handsker","🧤"],["scarf","halstørklæde","🧣"],["boots","støvler","👢"],["hat","hat","🎩"]],
+  sents:[["Put on your shoes.","Tag dine sko på.","shoes","👟"],["I have a new jacket.","Jeg har en ny jakke.","jacket","🧥"],
+  ["My socks are red.","Mine sokker er røde.","socks","🧦"],["She has a pink dress.","Hun har en lyserød kjole.","dress","👗"]]},
+ {id:"weather", en:"Weather", da:"Vejr og natur", ic:"🌦️", words:[
+  ["sun","sol","☀️"],["rain","regn","🌧️"],["snow","sne","❄️"],["wind","vind","💨"],["cloud","sky","☁️"],
+  ["tree","træ","🌳"],["flower","blomst","🌸"],["sea","hav","🌊"],["moon","måne","🌙"],["star","stjerne","⭐"],["rainbow","regnbue","🌈"]],
+  sents:[["The sun is hot.","Solen er varm.","sun","☀️"],["I can see the moon.","Jeg kan se månen.","moon","🌙"],
+  ["Look at the rainbow!","Se regnbuen!","rainbow","🌈"],["The snow is white.","Sneen er hvid.","snow","❄️"]]},
+ {id:"actions", en:"Actions", da:"Ting man gør", ic:"🏃", words:[
+  ["run","løbe","🏃"],["jump","hoppe","🦘"],["swim","svømme","🏊"],["eat","spise","🍽️"],["drink","drikke","🥤"],
+  ["sleep","sove","😴"],["read","læse","📚"],["write","skrive","✍️"],["sing","synge","🎤"],["dance","danse","💃"],
+  ["play","lege","🎲"],["cook","lave mad","🍳"]],
+  sents:[["I can swim.","Jeg kan svømme.","swim","🏊"],["Can you dance?","Kan du danse?","dance","💃"],
+  ["I like to read.","Jeg kan lide at læse.","read","📚"],["Dogs can run fast.","Hunde kan løbe hurtigt.","run","🏃"],["Let's play!","Lad os lege!","play","🎲"]]},
+ {id:"feelings", en:"Feelings", da:"Følelser", ic:"😊", words:[
+  ["happy","glad","😄"],["sad","ked af det","😢"],["angry","vred","😠"],["tired","træt","🥱"],["scared","bange","😱"],
+  ["hungry","sulten","🤤"],["cold","kold","🥶"],["hot","varm","🥵"],["surprised","overrasket","😮"],["sick","syg","🤒"]],
+  sents:[["They are happy.","De er glade.","are","😄",["are","is","am"]],["He is sad.","Han er ked af det.","is","😢",["is","am","are"]],
+  ["I am hungry.","Jeg er sulten.","hungry","🤤"],["Are you tired?","Er du træt?","tired","🥱"]]},
+ {id:"sports", en:"Sports & fun", da:"Sport og fritid", ic:"⚽", words:[
+  ["football","fodbold","⚽"],["tennis","tennis","🎾"],["bike","cykel","🚲"],["guitar","guitar","🎸"],["basketball","basketball","🏀"],
+  ["skateboard","skateboard","🛹"],["chess","skak","♟️"],["piano","klaver","🎹"],["handball","håndbold","🤾"],["game","spil","🎮"]],
+  sents:[["I play football.","Jeg spiller fodbold.","football","⚽"],["Can you ride a bike?","Kan du cykle?","bike","🚲"],
+  ["She plays the guitar.","Hun spiller guitar.","guitar","🎸"],["Do you like chess?","Kan du lide skak?","chess","♟️"]]},
+ {id:"days", en:"Days", da:"Ugedage", ic:"📅", words:[
+  ["Monday","mandag","MAN"],["Tuesday","tirsdag","TIR"],["Wednesday","onsdag","ONS"],["Thursday","torsdag","TOR"],
+  ["Friday","fredag","FRE"],["Saturday","lørdag","LØR"],["Sunday","søndag","SØN"],["week","uge","📅"],["weekend","weekend","🎉"],["today","i dag","👉"]],
+  sents:[["Today is Monday.","I dag er det mandag.","Monday","📅"],["I play football on Friday.","Jeg spiller fodbold om fredagen.","Friday","⚽"],
+  ["I love the weekend!","Jeg elsker weekenden!","weekend","🎉"],["Sunday is a fun day.","Søndag er en sjov dag.","Sunday","😎"]]},
+ {id:"bignumbers", en:"Big numbers", da:"Store tal", ic:"💯", words:[
+  ["thirty","tredive","30"],["forty","fyrre","40"],["fifty","halvtreds","50"],["sixty","tres","60"],["seventy","halvfjerds","70"],
+  ["eighty","firs","80"],["ninety","halvfems","90"],["hundred","hundrede","100"],["thousand","tusind","1000"]],
+  sents:[["My grandfather is seventy.","Min bedstefar er halvfjerds.","seventy","👴"],["I have fifty kroner.","Jeg har halvtreds kroner.","fifty","💰"],
+  ["There are thirty kids in my class.","Der er tredive børn i min klasse.","thirty","🏫"]]},
+ {id:"town", en:"Town", da:"Byen og trafik", ic:"🏙️", words:[
+  ["house","hus","🏠"],["shop","butik","🏪"],["car","bil","🚗"],["bus","bus","🚌"],["train","tog","🚆"],
+  ["street","gade","🛣️"],["park","park","🏞️"],["hospital","hospital","🏥"],["beach","strand","🏖️"],["plane","fly","✈️"],["boat","båd","⛵"],["police","politi","👮"]],
+  sents:[["I go to school by bus.","Jeg tager bussen i skole.","bus","🚌"],["The car is fast.","Bilen er hurtig.","car","🚗"],
+  ["Let's go to the beach!","Lad os tage på stranden!","beach","🏖️"],["The train is late.","Toget er forsinket.","train","🚆"]]}
+];
+const STAGES = [
+  {ic:"👀", en:"Find it", da:"Lyt og find billedet", per:2},
+  {ic:"🔤", en:"Spell it", da:"Læs og stav ordene", per:3},
+  {ic:"🐉", en:"Boss", da:"Skriv ordene og byg sætninger", per:4}
+];
+const DEFAULT_REWARDS = [
+  {ic:"📱", name:"15 min ekstra skærmtid", cost:40},
+  {ic:"🍦", name:"Is eller slik", cost:60},
+  {ic:"🍕", name:"Vælg aftensmad", cost:100},
+  {ic:"🎲", name:"Spilleaften med mor eller far", cost:120},
+  {ic:"🌙", name:"Bliv oppe 30 min længere", cost:150},
+  {ic:"💰", name:"20 kr", cost:200}
+];
+const TITLES = ["Rookie","Beginner","Explorer","Adventurer","Word Hunter","Hero","Champion","Superstar","Legend","Master","Grandmaster","English Wizard"];
+const PRAISE = ["Great job!","Super!","Well done!","Fantastic!","You got it!","Awesome!","Brilliant!","Nice!"];
+
+/* ================= HELPERS ================= */
+const app = document.getElementById("app");
+const $ = s => document.querySelector(s);
+const rand = a => a[Math.floor(Math.random()*a.length)];
+function shuffle(a){ a=a.slice(); for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]];} return a; }
+const esc = s => String(s).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const norm = s => String(s).toLowerCase().replace(/[’`]/g,"'").replace(/\s+/g," ").trim();
+const DAY = () => { const d=new Date(); return Math.floor((d.getTime()-d.getTimezoneOffset()*60000)/864e5); };
+function lev(a,b){ const m=a.length,n=b.length; const d=Array.from({length:m+1},(_,i)=>[i]); for(let j=1;j<=n;j++) d[0][j]=j;
+  for(let i=1;i<=m;i++) for(let j=1;j<=n;j++) d[i][j]=Math.min(d[i-1][j]+1,d[i][j-1]+1,d[i-1][j-1]+(a[i-1]===b[j-1]?0:1)); return d[m][n]; }
+const isTxtPic = p => /^[\p{L}\d]+$/u.test(p);
+const pic = p => isTxtPic(p) ? `<span class="picTxt">${esc(p)}</span>` : p;
+
+const ALLW = [], WMAP = {};
+WORLDS.forEach((W,wi)=>{
+  W.idx = wi;
+  W.list = W.words.map(([en,da,p])=>{ const o={en,da,pic:p,W}; ALLW.push(o); WMAP[en]=o; return o; });
+  W.sentences = W.sents.map(([en,da,blank,p,o])=>({en,da,blank,pic:p,o,W}));
+});
+const spellable = w => /^[a-z]+$/i.test(w.en) && w.en.length<=9;
+
+/* ================= STATE ================= */
+const KEY = "englishfun-v2";
+function fresh(){ return {v:2, name:"", xp:0, pts:0, words:{}, stages:{}, streak:{n:0,last:-99}, days:{}, badges:{},
+  log:[], rewards:DEFAULT_REWARDS.map(r=>({...r})), cap:150, pin:null, mission:null, best:{speed:0},
+  stats:{math:0, combo:0, missions:0}, sound:true, backupAt:0, created:Date.now()}; }
+let S = fresh();
+try{
+  const raw = localStorage.getItem(KEY);
+  if(raw){ const o=JSON.parse(raw); S = Object.assign(fresh(), o); S.stats=Object.assign(fresh().stats, o.stats||{}); S.best=Object.assign(fresh().best,o.best||{}); }
+  else {
+    const old = parseInt(localStorage.getItem("ef-stars")||"0",10)||0;
+    if(old>0){ S.pts=old; S.xp=old; S.log.push({t:Date.now(), type:"adj", n:old, note:"Stjerner fra den gamle udgave"}); }
+  }
+}catch(e){}
+let storageOK = true;
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(S)); storageOK=true; }catch(e){ storageOK=false; } }
+try{ if(navigator.storage && navigator.storage.persist) navigator.storage.persist(); }catch(e){}
+
+function dayRec(d){ d = d ?? DAY(); return S.days[d] || (S.days[d]={pts:0,xp:0,sec:0,n:0,ok:0}); }
+const totalMin = () => Math.round(Object.values(S.days).reduce((a,d)=>a+(d.sec||0),0)/60);
+const todayMin = () => Math.round((dayRec().sec||0)/60);
+
+/* active time: count time between interactions, max 30 s per gap */
+let lastAct = 0;
+function tick(){
+  const now=Date.now(), d=dayRec();
+  if(lastAct){ const before=d.sec; d.sec += Math.min(now-lastAct,30000)/1000;
+    if(before<600 && d.sec>=600) toast("⏱️ 10 minutter i dag – sejt! 💪"); }
+  lastAct = now;
+}
+
+/* levels */
+const lvlAt = L => 25*L*(L-1);
+function lvlOf(x){ let L=1; while(x>=lvlAt(L+1)) L++; return L; }
+const titleOf = L => TITLES[Math.min(L-1,TITLES.length-1)] + (L>TITLES.length ? " "+(L-TITLES.length+1) : "");
+
+let capWarned = false;
+function award(n){
+  if(n<=0) return 0;
+  const d=dayRec(), before=lvlOf(S.xp);
+  S.xp += n; d.xp += n;
+  const g = Math.min(n, Math.max(0, S.cap - d.pts));
+  S.pts += g; d.pts += g;
+  if(g<n && !capWarned){ capWarned=true; toast("Du har nået dagens point-loft 🪙 Du får stadig XP!"); }
+  const after=lvlOf(S.xp);
+  save(); hudUpdate();
+  if(after>before) setTimeout(()=>{ SFX.up(); confetti(); celebrate("🎖️","Level "+after+"!", titleOf(after)+" · +10 🪙"); award(10); }, 400);
+  return g;
+}
+
+/* spaced repetition: box 0–5 */
+const GAP = [0,1,2,4,7,14];
+function introduce(en){ if(!S.words[en]) S.words[en]={b:0,due:DAY(),r:0,x:0}; }
+function srs(en,q){
+  if(!WMAP[en]) return; introduce(en); const r=S.words[en];
+  if(q===2){ r.b=Math.min(5,r.b+1); r.r++; } else if(q===1){ r.r++; } else { r.b=Math.max(0,r.b-2); r.x++; }
+  r.due = DAY() + (q===0 ? 0 : GAP[r.b]);
+}
+const mastered = () => Object.values(S.words).filter(r=>r.b>=4).length;
+const wordBox = en => S.words[en] ? S.words[en].b : -1;
+
+/* worlds/stages */
+function stars(wi,s){ return (S.stages[WORLDS[wi].id]||[0,0,0])[s]||0; }
+function setStars(wi,s,n){ const id=WORLDS[wi].id; const a=S.stages[id]||(S.stages[id]=[0,0,0]); a[s]=Math.max(a[s],n); }
+function worldOpen(wi){ return wi<2 || stars(wi-1,0)>0; }
+function stageOpen(wi,s){ return worldOpen(wi) && (s===0 || stars(wi,s-1)>0); }
+function nextStage(){
+  for(let wi=0;wi<WORLDS.length;wi++) for(let s=0;s<3;s++) if(stageOpen(wi,s) && !stars(wi,s)) return {wi,s};
+  let best=null;
+  WORLDS.forEach((W,wi)=>{ for(let s=0;s<3;s++){ const st=stars(wi,s); if(!best||st<best.st) best={wi,s,st}; } });
+  return best;
+}
+const openWorlds = () => WORLDS.filter((W,wi)=>worldOpen(wi));
+
+/* ================= SOUND & SPEECH ================= */
+let AC=null;
+function beep(seq){
+  if(!S.sound) return;
+  try{ AC = AC || new (window.AudioContext||window.webkitAudioContext)(); const t0=AC.currentTime+0.01;
+    seq.forEach(([f,st,du,type])=>{ const o=AC.createOscillator(), g=AC.createGain(); o.type=type||"sine"; o.frequency.value=f;
+      const vol = type==="square" ? 0.06 : 0.16;
+      g.gain.setValueAtTime(0.0001,t0+st); g.gain.exponentialRampToValueAtTime(vol,t0+st+0.02); g.gain.exponentialRampToValueAtTime(0.0001,t0+st+du);
+      o.connect(g); g.connect(AC.destination); o.start(t0+st); o.stop(t0+st+du+0.05); });
+  }catch(e){}
+}
+const SFX = {
+  ok:()=>beep([[660,0,.12],[880,.09,.2]]),
+  bad:()=>beep([[240,0,.22,"triangle"]]),
+  combo:()=>beep([[523,0,.1],[659,.08,.1],[784,.16,.1],[1047,.24,.25]]),
+  coin:()=>beep([[988,0,.08,"square"],[1319,.07,.22,"square"]]),
+  up:()=>beep([[523,0,.15],[659,.12,.15],[784,.24,.15],[1047,.36,.4]]),
+  tick:()=>beep([[1200,0,.05,"square"]])
+};
+let voice=null;
+function findVoice(){ try{ const vs=speechSynthesis.getVoices();
+  voice = vs.find(v=>/en-GB/i.test(v.lang)&&/Google/i.test(v.name)) || vs.find(v=>/en-GB/i.test(v.lang)) || vs.find(v=>/^en/i.test(v.lang)) || null; }catch(e){} }
+if("speechSynthesis" in window){ findVoice(); speechSynthesis.onvoiceschanged=findVoice; }
+function speak(text, rate){
+  try{ if(!("speechSynthesis" in window)) return; speechSynthesis.cancel();
+    const u=new SpeechSynthesisUtterance(text); u.lang = voice ? voice.lang : "en-GB"; if(voice) u.voice=voice; u.rate = rate||0.85;
+    speechSynthesis.speak(u); }catch(e){}
+}
+
+/* ================= UI PRIMITIVES ================= */
+let KEYH=null, TIMER=null, INTERVAL=null;
+document.addEventListener("keydown", e=>{ if($(".modal-bg")) return; if(KEYH) KEYH(e); });
+function later(fn,ms){ clearTimeout(TIMER); TIMER=setTimeout(fn,ms); }
+function go(fn){ clearTimeout(TIMER); clearInterval(INTERVAL); KEYH=null; try{speechSynthesis.cancel();}catch(e){} fn(); window.scrollTo(0,0); }
+
+function toast(msg){ const t=document.createElement("div"); t.className="toast"; t.innerHTML=msg; $("#toasts").appendChild(t); setTimeout(()=>t.remove(),3200); }
+function floatMsg(msg, el){
+  const f=document.createElement("div"); f.className="float"; f.textContent=msg;
+  const r=(el||app).getBoundingClientRect(); f.style.left=(r.left+r.width/2-30)+"px"; f.style.top=(el? r.top : window.innerHeight/2)+"px";
+  document.body.appendChild(f); setTimeout(()=>f.remove(),1200);
+}
+function celebrate(ic,title,sub){
+  const c=document.createElement("div"); c.className="celebrate";
+  c.innerHTML=`<div class="card"><div class="ic">${ic}</div><h2>${esc(title)}</h2><p class="sub" style="margin:0">${esc(sub||"")}</p></div>`;
+  c.onclick=()=>c.remove(); document.body.appendChild(c); setTimeout(()=>c.remove(),2600);
+}
+function modal(html, onOpen){
+  const bg=document.createElement("div"); bg.className="modal-bg";
+  bg.innerHTML=`<div class="modal" role="dialog" aria-modal="true">${html}</div>`;
+  document.body.appendChild(bg);
+  const close=()=>bg.remove();
+  bg.addEventListener("click",e=>{ if(e.target===bg) close(); });
+  bg.addEventListener("keydown",e=>{ if(e.key==="Escape") close(); });
+  if(onOpen) onOpen(bg.querySelector(".modal"), close);
+  const f=bg.querySelector("input,button"); if(f) f.focus();
+  return close;
+}
+function confirmBox(text, yes, onYes){
+  modal(`<p style="font-size:1.2rem">${text}</p><div class="row"><button class="pill-btn" data-no>Nej</button><button class="play" style="padding:10px 20px" data-yes>${yes}</button></div>`,
+    (m,close)=>{ m.querySelector("[data-no]").onclick=close; m.querySelector("[data-yes]").onclick=()=>{close(); onYes();}; });
+}
+
+/* confetti */
+function confetti(){
+  if(matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const cv=$("#confetti"), cx=cv.getContext("2d"); cv.width=innerWidth; cv.height=innerHeight;
+  const cols=["#2F7FE8","#7350F0","#E8456F","#1F9A60","#FFC93C","#FF7A1A"];
+  const P=Array.from({length:130},()=>({x:innerWidth/2+(Math.random()-.5)*200, y:innerHeight*0.35, vx:(Math.random()-.5)*14, vy:-Math.random()*14-4, s:6+Math.random()*7, c:rand(cols), r:Math.random()*6, vr:(Math.random()-.5)*.3}));
+  let f=0; (function step(){ cx.clearRect(0,0,cv.width,cv.height);
+    P.forEach(p=>{ p.x+=p.vx; p.y+=p.vy; p.vy+=0.45; p.vx*=0.99; p.r+=p.vr; cx.save(); cx.translate(p.x,p.y); cx.rotate(p.r); cx.fillStyle=p.c; cx.fillRect(-p.s/2,-p.s/3,p.s,p.s*0.6); cx.restore(); });
+    if(++f<120) requestAnimationFrame(step); else cx.clearRect(0,0,cv.width,cv.height); })();
+}
+
+/* top bar */
+function topBar(back){
+  return `<div class="top">${back?`<button class="pill-btn" data-back>◀ ${back}</button>`:`<span></span>`}
+    <div class="right"><span class="chip" title="Level">⭐ Lv ${lvlOf(S.xp)}</span><span class="chip coins" id="hudPts" title="Point">🪙 ${S.pts}</span></div></div>`;
+}
+function hudUpdate(){ const h=$("#hudPts"); if(h) h.textContent="🪙 "+S.pts; }
+function bindBack(fn){ const b=app.querySelector("[data-back]"); if(b) b.onclick=()=>go(fn); }
+
+/* ================= BADGES ================= */
+const BADGES = [
+  {id:"m1", ic:"🚀", en:"Lift off", da:"Klar din første mission", ok:()=>S.stats.missions>=1},
+  {id:"m10", ic:"🛰️", en:"Mission pro", da:"Klar 10 missioner", ok:()=>S.stats.missions>=10},
+  {id:"s3", ic:"🔥", en:"On fire", da:"3 dage i træk", ok:()=>S.streak.n>=3},
+  {id:"s7", ic:"🌟", en:"One week", da:"7 dage i træk", ok:()=>S.streak.n>=7},
+  {id:"s14", ic:"💎", en:"Unstoppable", da:"14 dage i træk", ok:()=>S.streak.n>=14},
+  {id:"w25", ic:"📗", en:"Word collector", da:"Lær 25 ord helt", ok:()=>mastered()>=25},
+  {id:"w50", ic:"📘", en:"Word master", da:"Lær 50 ord helt", ok:()=>mastered()>=50},
+  {id:"w100", ic:"📚", en:"Dictionary", da:"Lær 100 ord helt", ok:()=>mastered()>=100},
+  {id:"c10", ic:"⚡", en:"Combo king", da:"10 rigtige i træk", ok:()=>S.stats.combo>=10},
+  {id:"math", ic:"🧮", en:"Math whiz", da:"25 regnestykker på engelsk", ok:()=>S.stats.math>=25},
+  {id:"speed", ic:"🏎️", en:"Speedy", da:"15 rigtige i Lynrunden", ok:()=>S.best.speed>=15},
+  {id:"perfect", ic:"👑", en:"Perfect world", da:"3 stjerner på alle baner i en verden", ok:()=>WORLDS.some((W,i)=>[0,1,2].every(s=>stars(i,s)===3))},
+  {id:"explorer", ic:"🗺️", en:"Explorer", da:"Lås 8 verdener op", ok:()=>openWorlds().length>=8},
+  {id:"l5", ic:"🎖️", en:"Level 5", da:"Nå level 5", ok:()=>lvlOf(S.xp)>=5},
+  {id:"l10", ic:"🏅", en:"Level 10", da:"Nå level 10", ok:()=>lvlOf(S.xp)>=10},
+  {id:"r1", ic:"🎁", en:"Treat yourself", da:"Løn din første belønning ind", ok:()=>S.log.some(l=>l.type==="redeem")},
+  {id:"t60", ic:"⏱️", en:"One hour", da:"Træn 60 minutter i alt", ok:()=>totalMin()>=60}
+];
+function checkBadges(){
+  BADGES.forEach((b,i)=>{ if(!S.badges[b.id] && b.ok()){ S.badges[b.id]=Date.now();
+    setTimeout(()=>{ SFX.up(); toast(`${b.ic} Nyt trofæ: <b>${b.en}</b> +10 🪙`); award(10); }, 900+i*300); } });
+  save();
+}
+
+/* ================= HOME ================= */
+function home(){
+  if(!S.name) return welcome();
+  const L=lvlOf(S.xp), lo=lvlAt(L), hi=lvlAt(L+1), M=missionState();
+  const streakAlive = S.streak.last>=DAY()-1 ? S.streak.n : 0;
+  app.innerHTML = `
+    <div class="top"><span></span><div class="right"><button class="chip" id="snd" aria-label="Lyd">${S.sound?"🔊":"🔇"}</button><span class="chip coins" id="hudPts">🪙 ${S.pts}</span></div></div>
+    <div class="hello"><h1>Hi ${esc(S.name)}! 👋</h1></div>
+    <div class="player">
+      <div class="lvl"><div><small>LEVEL</small><b>${L}</b></div></div>
+      <div class="info"><h3>${titleOf(L)}</h3>
+        <div class="xpbar"><i style="width:${Math.round((S.xp-lo)/(hi-lo)*100)}%"></i></div>
+        <div class="xptext">${S.xp-lo} / ${hi-lo} XP til level ${L+1}</div></div>
+    </div>
+    <div class="stats">
+      <div class="stat"><b>🪙 ${S.pts}</b><small>point</small></div>
+      <div class="stat"><b>🔥 ${streakAlive}</b><small>${streakAlive===1?"dag":"dage"} i træk</small></div>
+      <div class="stat"><b>📚 ${mastered()}</b><small>ord lært</small></div>
+    </div>
+    <button class="mission-btn ${M.done?"done":""}" id="mission">
+      <span class="ic">${M.done?"✅":"🚀"}</span>
+      <span><b>${M.done?"Mission klaret!":"Dagens mission"}</b>
+      <small>${M.done?"Kom igen i morgen og hold din 🔥 i live. Du kan stadig spille videre.":"Cirka 10 minutter · "+(M.started?"trin "+(M.step+1)+" af 3":"start nu")+" · +bonus 🪙"}</small></span>
+    </button>
+    <div class="tiles4">
+      <button class="tile-btn" id="map"><span class="ic">🗺️</span><span><b>Worlds</b><small>Verdener og baner</small></span></button>
+      <button class="tile-btn" id="arcade"><span class="ic">🕹️</span><span><b>Arcade</b><small>Bonusspil</small></span></button>
+      <button class="tile-btn" id="shop"><span class="ic">🎁</span><span><b>Rewards</b><small>Løn dine point ind</small></span></button>
+      <button class="tile-btn" id="trophies"><span class="ic">🏆</span><span><b>Trophies</b><small>${Object.keys(S.badges).length} af ${BADGES.length}</small></span></button>
+    </div>
+    <div class="foot"><span>${storageOK?"💾 Gemt på denne computer":"⚠️ Kunne ikke gemme"} · ⏱️ ${todayMin()} min i dag</span>
+      <button class="linkish" id="parent">👪 Mor og far</button></div>`;
+  $("#snd").onclick=()=>{ S.sound=!S.sound; save(); home(); };
+  $("#mission").onclick=()=>go(missionScreen);
+  $("#map").onclick=()=>go(mapScreen);
+  $("#arcade").onclick=()=>go(arcade);
+  $("#shop").onclick=()=>go(shop);
+  $("#trophies").onclick=()=>go(trophies);
+  $("#parent").onclick=()=>parentGate(()=>go(parent));
+  KEYH=e=>{ if(e.key==="Enter") go(missionScreen); };
+}
+
+function welcome(){
+  app.innerHTML = `<div class="end"><div class="bigstar">👋</div><h2>Welcome to English Fun!</h2>
+    <p class="sub">Hvad hedder du?</p>
+    <div class="typebox"><input id="nm" maxlength="20" autocomplete="off" placeholder="Dit navn"><button class="check" id="ok">Start ▶</button></div>
+    <p class="note" style="margin-top:18px">Navnet gemmes kun på denne computer.</p></div>`;
+  const inp=$("#nm"); inp.focus();
+  const ok=()=>{ const v=inp.value.trim(); if(!v){ inp.classList.add("no"); return; } S.name=v; save(); go(home); };
+  $("#ok").onclick=ok; inp.onkeydown=e=>{ if(e.key==="Enter") ok(); };
+}
+
+/* ================= MISSION ================= */
+const BONUS_GAMES = {math:{ic:"🧮",en:"Math in English",da:"Regn på engelsk"}, speed:{ic:"⚡",en:"Speed round",da:"Lynrunde – 60 sekunder"}, build:{ic:"🧩",en:"Sentence builder",da:"Byg sætninger"}};
+function missionState(){
+  const d=DAY();
+  if(!S.mission || S.mission.day!==d){
+    const order=["math","speed","build"]; let bonus=order[d%3];
+    if(bonus==="speed" && seenPool().length<6) bonus="math";
+    S.mission={day:d, step: reviewItems().length>=3 ? 0 : 1, done:false, bonus};
+    save();
+  }
+  return S.mission;
+}
+function missionScreen(){
+  const M=missionState(), ns=nextStage(), W=WORLDS[ns.wi], BG=BONUS_GAMES[M.bonus];
+  const steps=[
+    {ic:"🧠", en:"Warm-up", da:"Gentag ord du har lært", min:2},
+    {ic:STAGES[ns.s].ic, en:`${W.ic} ${W.en} · ${STAGES[ns.s].en}`, da:`Bane ${ns.s+1}: ${STAGES[ns.s].da}`, min:4},
+    {ic:BG.ic, en:BG.en, da:BG.da, min:3}
+  ];
+  const skipWarm = M.step>0 && !M.didWarm;
+  app.innerHTML = topBar("Hjem") + `<h2>🚀 Today's mission</h2>
+    <p class="sub">Tre korte trin, cirka 10 minutter. Klar dem alle og få bonuspoint og en 🔥 mere.</p>
+    <div class="path">${steps.map((s,i)=>{ const st = M.done||i<M.step ? "ok" : i===M.step ? "now" : "";
+      const label = i===0 && skipWarm ? "Ingen ord at gentage endnu" : s.da;
+      return `<div class="step ${st}"><span class="n">${st==="ok"?"✓":s.ic}</span><div><b>${esc(s.en)}</b><br><small>${label} · ca. ${s.min} min</small></div></div>`; }).join("")}
+      <div class="step ${M.done?"ok":""}"><span class="n">🎁</span><div><b>Mission bonus</b><br><small>+20 🪙 og ekstra for hver dag i træk</small></div></div>
+    </div>
+    ${M.done ? `<button class="big-go alt" id="go">🗺️ Spil videre på kortet</button>` : `<button class="big-go" id="go">${M.step===0?"Start ▶":"Fortsæt ▶"}</button>`}`;
+  bindBack(home);
+  const start=()=>{
+    if(M.done) return go(mapScreen);
+    M.started=true; save();
+    if(M.step===0) return go(()=>runRound({title:"Warm-up", items:reviewItems(), per:3, onDone:R=>{ M.didWarm=true; toast(`🧠 Warm-up klaret · +${R.earned} 🪙`); missionNext(); }}));
+    if(M.step===1) return go(()=>startStage(ns.wi, ns.s, true));
+    if(M.step===2) return go(()=>startBonus(M.bonus, true));
+  };
+  $("#go").onclick=start; KEYH=e=>{ if(e.key==="Enter") start(); };
+}
+function missionAdvance(r){
+  const M=missionState(); M.step++;
+  if(M.step>=3 && !M.done){
+    M.done=true; S.stats.missions++;
+    const d=DAY();
+    S.streak.n = S.streak.last===d-1 ? S.streak.n+1 : (S.streak.last===d ? S.streak.n : 1);
+    S.streak.last=d;
+    const bonus = 20 + Math.min(20, 2*S.streak.n);
+    save(); award(bonus); SFX.coin(); confetti();
+    checkBadges();
+    return showResult({ic:"🏆", title:"Mission complete!", lines:[["Bonus",`+${bonus} 🪙`],["Dage i træk",`🔥 ${S.streak.n}`],["Tid i dag",`${todayMin()} min`]],
+      sub:"Super flot! Kom igen i morgen.", buttons:[["🏠 Hjem",home],["🗺️ Spil videre",mapScreen]]}), true;
+  }
+  save();
+  return false;
+}
+function missionNext(){ if(!missionAdvance()) go(missionScreen); }
+
+/* ================= ITEMS ================= */
+function seenPool(){ return ALLW.filter(w=>S.words[w.en]); }
+function poolFor(w){ return w.W.list.length>=4 ? w.W.list : ALLW; }
+function pickOpts(correct, pool, n, key){
+  const out=[correct];
+  for(const o of shuffle(pool)){ if(out.length>=n) break; if(!out.some(y=>y[key]===o[key] || norm(y.en)===norm(o.en))) out.push(o); }
+  if(out.length<n) for(const o of shuffle(ALLW)){ if(out.length>=n) break; if(!out.some(y=>y[key]===o[key])) out.push(o); }
+  return shuffle(out);
+}
+function itemForBox(w){
+  const b=Math.max(0,wordBox(w.en));
+  if(b<=1) return {t:Math.random()<.5?"pic2word":"listen2pic", w};
+  if(b===2) return {t:"listen2word", w};
+  if(b===3) return {t:spellable(w)?"spell":"type", w};
+  return {t:"type", w};
+}
+function reviewItems(){
+  const d=DAY();
+  let due=ALLW.filter(w=>S.words[w.en] && S.words[w.en].due<=d).sort((a,b)=>S.words[a.en].b-S.words[b.en].b);
+  due = shuffle(due.slice(0,10)).slice(0,6);
+  if(due.length<6){
+    const extra=shuffle(seenPool().filter(w=>!due.includes(w))).sort((a,b)=>S.words[a.en].b-S.words[b.en].b).slice(0,6-due.length);
+    due=due.concat(extra);
+  }
+  return due.map(itemForBox);
+}
+function hardItems(){
+  return seenPool().filter(w=>S.words[w.en].x>0).sort((a,b)=>(S.words[b.en].x/(S.words[b.en].r+1))-(S.words[a.en].x/(S.words[a.en].r+1))).slice(0,8).map(itemForBox);
+}
+function stageItems(wi,s){
+  const W=WORLDS[wi], ws=shuffle(W.list).slice(0,8);
+  if(s===0) return ws.map((w,i)=>({t:i%2?"pic2word":"listen2pic", w}));
+  if(s===1) return ws.map((w,i)=>({t: i%2===0 && spellable(w) ? "spell" : "listen2word", w}));
+  const sents=shuffle(W.sentences); const out=[];
+  const types=["type","fill","type","build","type","fill","type","build"];
+  let wi2=0, si=0;
+  types.forEach(t=>{ if(t==="type"||si>=sents.length) out.push({t:"type", w:ws[wi2++ % ws.length]}); else out.push({t, s:sents[si++]}); });
+  return out;
+}
+
+/* round runner */
+function runRound(cfg){
+  const items=cfg.items, R={i:0, perfect:0, combo:0, best:0, earned:0};
+  if(!items.length) return cfg.onDone ? cfg.onDone(R) : go(home);
+  lastAct=Date.now();
+  const api={
+    frame(inner){
+      app.innerHTML = `<div class="rhead"><button class="pill-btn" id="quit" aria-label="Stop">✕</button>
+        <div class="progress"><i style="width:${R.i/items.length*100}%"></i></div>
+        <span class="combo ${R.combo>=3?"on":""}">🔥${R.combo}</span><span class="gain">+${R.earned} 🪙</span></div>` + inner;
+      $("#quit").onclick=()=>confirmBox("Vil du stoppe? Dine point er gemt, men banen tæller ikke.","Stop",()=>go(home));
+    },
+    answer(q, en){
+      tick(); const d=dayRec(); d.n++; if(q===2) d.ok++;
+      if(en) srs(en,q);
+      let p = q===2 ? cfg.per : q===1 ? 1 : 0;
+      if(q===2){ R.perfect++; R.combo++; R.best=Math.max(R.best,R.combo); if(R.combo>(S.stats.combo||0)) S.stats.combo=R.combo; } else R.combo=0;
+      if(cfg.kind==="math" && q===2) S.stats.math++;
+      if(q===2 && R.combo>0 && R.combo%5===0){ p+=5; const c=R.combo; setTimeout(()=>{ SFX.combo(); toast(`🔥 ${c} i træk! +5 bonus`); },250); }
+      const g=award(p); R.earned+=g;
+      const c=app.querySelector(".combo"); if(c){ c.textContent="🔥"+R.combo; c.classList.toggle("on",R.combo>=3); }
+      const gn=app.querySelector(".gain"); if(gn) gn.textContent=`+${R.earned} 🪙`;
+      if(g>0) floatMsg("+"+g+" 🪙", app.querySelector(".prompt"));
+      return g;
+    },
+    wait(ms){
+      const fb=$("#fb"); const b=document.createElement("button"); b.className="pill-btn nextbtn"; b.textContent="Næste ▶"; fb.appendChild(b);
+      const nx=()=>{ R.i++; go(next); };
+      b.onclick=nx; KEYH=e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); nx(); } };
+      later(nx, ms);
+    }
+  };
+  function next(){
+    if(R.i>=items.length){ save(); return cfg.onDone(R); }
+    const it=items[R.i]; ITEM[it.t](it, api);
+  }
+  next();
+}
+
+function mc(api, o){
+  let first=true;
+  api.frame(o.top + `<div class="opts ${o.three?"three":""}">${o.options.map((x,n)=>`<button class="opt ${o.emoji?"emoji":""}" data-n="${n}" aria-label="${esc(o.aria?o.aria(x):o.label(x))}"><kbd>${n+1}</kbd>${o.label(x)}</button>`).join("")}</div><p class="feedback" id="fb"></p>`);
+  const btns=[...app.querySelectorAll(".opt")], fb=$("#fb");
+  if(o.onShow) o.onShow();
+  const pick=n=>{
+    const b=btns[n]; if(!b||b.disabled) return; const x=o.options[n];
+    if(o.isRight(x)){
+      btns.forEach(y=>y.disabled=true); b.classList.add("right"); SFX.ok();
+      api.answer(first?2:0, o.en);
+      fb.className="feedback good"; fb.innerHTML=`${rand(PRAISE)} ${o.right?`<small>${o.right()}</small>`:""}`;
+      if(o.say) o.say();
+      KEYH=null; api.wait(o.ms||1700);
+    } else {
+      first=false; b.classList.add("wrong"); b.disabled=true; SFX.bad();
+      fb.className="feedback bad"; fb.innerHTML=`Prøv igen! ${o.wrong?`<small>${o.wrong(x)}</small>`:"<small>Det klarer du!</small>"}`;
+      if(o.onWrong) o.onWrong();
+    }
+  };
+  btns.forEach((b,n)=>b.onclick=()=>pick(n));
+  KEYH=e=>{ const k=parseInt(e.key,10); if(k>=1&&k<=o.options.length) pick(k-1); };
+}
+
+const ITEM = {
+  pic2word(it,api){ const w=it.w; introduce(w.en); const opts=pickOpts(w,poolFor(w),4,"en");
+    mc(api,{top:`<div class="prompt"><div class="pic" aria-hidden="true">${pic(w.pic)}</div><p class="sub" style="margin:4px 0 0">Hvad hedder det på engelsk?</p></div>`,
+      options:opts, label:x=>esc(x.en), isRight:x=>x.en===w.en, en:w.en,
+      right:()=>`${esc(w.en)} = ${esc(w.da)}`, wrong:x=>`${esc(x.en)} betyder ${esc(x.da)} ${pic(x.pic)}`, say:()=>speak(w.en)}); },
+  listen2pic(it,api){ const w=it.w; introduce(w.en); const opts=pickOpts(w,poolFor(w),4,"pic");
+    mc(api,{top:`<div class="prompt"><p class="sub" style="margin:0">Lyt og tryk på det rigtige billede</p><button class="speak huge" id="say">🔊 Listen</button></div>`,
+      options:opts, emoji:true, label:x=>pic(x.pic), aria:x=>x.da, isRight:x=>x.en===w.en, en:w.en,
+      right:()=>`${esc(w.en)} = ${esc(w.da)}`, wrong:x=>`Det var ${esc(x.en)}. Lyt igen 🔊`,
+      onShow:()=>{ $("#say").onclick=()=>speak(w.en); speak(w.en); }, onWrong:()=>setTimeout(()=>speak(w.en),600), say:()=>speak(w.en)}); },
+  listen2word(it,api){ const w=it.w; introduce(w.en);
+    const pool=poolFor(w).filter(x=>x.en!==w.en).sort((a,b)=>Math.abs(a.en.length-w.en.length)-Math.abs(b.en.length-w.en.length)+(Math.random()-.5)*3);
+    const opts=pickOpts(w,pool.slice(0,6),4,"en");
+    mc(api,{top:`<div class="prompt"><p class="sub" style="margin:0">Lyt – hvilket ord hører du?</p><button class="speak huge" id="say">🔊 Listen</button></div>`,
+      options:opts, label:x=>esc(x.en), isRight:x=>x.en===w.en, en:w.en,
+      right:()=>`${pic(w.pic)} ${esc(w.en)} = ${esc(w.da)}`, wrong:x=>`Det står der ${esc(x.en)} (${esc(x.da)})`,
+      onShow:()=>{ $("#say").onclick=()=>speak(w.en); speak(w.en); }, onWrong:()=>setTimeout(()=>speak(w.en),600), say:()=>speak(w.en)}); },
+  spell(it,api){ const w=it.w; introduce(w.en);
+    const target=w.en.toUpperCase().split("");
+    let letters=shuffle(target), t=0; while(letters.join("")===target.join("") && target.length>1 && t++<10) letters=shuffle(target);
+    let picked=[], first=true, hinted=false, locked=false;
+    function draw(state){
+      api.frame(`<div class="prompt"><div class="pic" aria-hidden="true">${pic(w.pic)}</div><div class="da">🇩🇰 ${esc(w.da)}</div>
+        <button class="speak" id="say">🔊 Listen</button></div>
+        <p class="sub" style="text-align:center;margin:0">Stav ordet – tryk på bogstaverne eller skriv på tastaturet</p>
+        <div class="slots ${state||""}">${target.map((_,n)=>`<div class="slot ${picked[n]!==undefined?"filled":""}">${picked[n]!==undefined?letters[picked[n]]:""}</div>`).join("")}</div>
+        <div class="letters">${letters.map((l,n)=>`<button class="letter ${picked.includes(n)?"used":""}" data-n="${n}" aria-label="${l}">${l}</button>`).join("")}</div>
+        <div class="row-btns"><button class="pill-btn" id="undo">⌫ Slet</button><button class="pill-btn" id="hint">💡 Hjælp</button></div>
+        <p class="feedback" id="fb"></p>`);
+      $("#say").onclick=()=>speak(w.en);
+      if(locked) return;
+      $("#undo").onclick=()=>{ picked.pop(); draw(); };
+      $("#hint").onclick=hint;
+      app.querySelectorAll(".letter").forEach(b=>b.onclick=()=>add(+b.dataset.n));
+      KEYH=e=>{ if(e.key==="Backspace"){ e.preventDefault(); picked.pop(); draw(); return; }
+        const k=e.key.toUpperCase(); if(k.length!==1) return;
+        const n=letters.findIndex((l,i)=>l===k && !picked.includes(i)); if(n>=0) add(n); };
+    }
+    function add(n){ if(picked.length>=target.length||picked.includes(n)) return; picked.push(n); if(picked.length===target.length) check(); else draw(); }
+    function hint(){ hinted=true;
+      let ok=0; while(ok<picked.length && letters[picked[ok]]===target[ok]) ok++;
+      picked=picked.slice(0,ok); if(ok>=target.length) return;
+      const n=letters.findIndex((l,i)=>l===target[ok] && !picked.includes(i)); picked.push(n);
+      if(picked.length===target.length) check(); else draw(); }
+    function check(){
+      if(picked.map(n=>letters[n]).join("")===target.join("")){
+        locked=true; draw("ok"); app.querySelectorAll(".letter,#undo,#hint").forEach(x=>x.disabled=true); SFX.ok();
+        api.answer(first&&!hinted?2:(first?1:0), w.en);
+        const fb=$("#fb"); fb.className="feedback good"; fb.innerHTML=`${rand(PRAISE)}<small>${esc(w.en)} = ${esc(w.da)}</small>`;
+        speak(w.en); KEYH=null; api.wait(1700);
+      } else {
+        first=false; SFX.bad(); draw("no");
+        const fb=$("#fb"); fb.className="feedback bad"; fb.innerHTML=`Næsten! Prøv igen.<small>Lyt godt efter 🔊 – eller tryk på 💡</small>`;
+        setTimeout(()=>{ if(locked) return; picked=[]; draw(); speak(w.en); },1100);
+      }
+    }
+    draw(); speak(w.en);
+  },
+  type(it,api){ const w=it.w; introduce(w.en);
+    let tries=0, hints=0, reveal=false;
+    api.frame(`<div class="prompt"><div class="pic" aria-hidden="true">${pic(w.pic)}</div><div class="da">🇩🇰 ${esc(w.da)}</div>
+      <p class="sub" style="margin:6px 0 0">Skriv ordet på engelsk</p></div>
+      <div class="typebox"><input id="ans" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Dit svar"><button class="check" id="chk">Tjek ✓</button></div>
+      <div class="row-btns" style="margin-top:12px"><button class="pill-btn" id="say">🔊 Lyt</button><button class="pill-btn" id="hint">💡 Hjælp</button></div>
+      <p class="feedback" id="fb"></p>`);
+    const inp=$("#ans"), fb=$("#fb"); inp.focus();
+    $("#say").onclick=()=>{ speak(w.en); inp.focus(); };
+    $("#hint").onclick=()=>{ hints++; const a=w.en; const k=Math.min(a.length, hints + Math.floor(a.length/4)); inp.value=a.slice(0,k); inp.focus(); };
+    const check=()=>{
+      const g=norm(inp.value), a=norm(w.en); if(!g) return;
+      if(g===a){
+        inp.classList.remove("no"); inp.classList.add("ok"); inp.disabled=true; $("#chk").disabled=true; $("#hint").disabled=true; SFX.ok();
+        const q = reveal ? 0 : (tries===0 && hints===0 ? 2 : 1);
+        api.answer(q, w.en);
+        fb.className="feedback good"; fb.innerHTML=`${q===2?rand(PRAISE):"Godt!"}<small>${esc(w.en)} = ${esc(w.da)}</small>`;
+        speak(w.en); KEYH=null; api.wait(1700); return;
+      }
+      tries++; SFX.bad(); inp.classList.remove("no"); void inp.offsetWidth; inp.classList.add("no");
+      if(!reveal && lev(g,a)===1 && tries<3){ fb.className="feedback bad"; fb.innerHTML=`Næsten! Kun ét bogstav er forkert.<small>Prøv igen</small>`; }
+      else if(tries>=2 || reveal){ reveal=true; fb.className="feedback bad"; fb.innerHTML=`Det hedder <b>${esc(w.en)}</b><small>Skriv det af – så husker du det bedre</small>`; inp.value=""; speak(w.en); }
+      else { fb.className="feedback bad"; fb.innerHTML=`Ikke helt.<small>Prøv igen, eller tryk på 🔊 eller 💡</small>`; }
+      inp.focus();
+    };
+    $("#chk").onclick=check;
+    inp.onkeydown=e=>{ if(e.key==="Enter"){ e.preventDefault(); e.stopPropagation(); check(); } };
+  },
+  fill(it,api){ const s=it.s;
+    const re=new RegExp("\\b"+s.blank.replace(/[.*+?^${}()|[\]\\]/g,"\\$&")+"\\b");
+    const pool=s.W.list.map(x=>x.en).filter(x=>norm(x)!==norm(s.blank));
+    const options = shuffle(s.o ? s.o : [s.blank, ...shuffle(pool).slice(0,2)]);
+    const shown = esc(s.en).replace(re,'<span class="blank" id="bl">&nbsp;</span>');
+    if(WMAP[s.blank]) introduce(s.blank);
+    mc(api,{top:`<div class="prompt"><div class="pic" style="font-size:clamp(3rem,10vh,4.5rem)" aria-hidden="true">${pic(s.pic)}</div>
+      <div class="sentence">${shown}</div><p class="sub" style="margin:8px 0 0">Hvilket ord passer?</p></div>`,
+      three:true, options, label:x=>esc(x), isRight:x=>x===s.blank, en:WMAP[s.blank]?s.blank:null,
+      right:()=>{ const b=$("#bl"); if(b){ b.textContent=s.blank; b.style.color="var(--leaf)"; b.style.borderColor="var(--leaf)"; } return `🇩🇰 ${esc(s.da)}`; },
+      wrong:x=>WMAP[x]?`${esc(x)} betyder ${esc(WMAP[x].da)}`:"Læs sætningen højt for dig selv", say:()=>speak(s.en), ms:2600});
+  },
+  build(it,api){ const s=it.s;
+    const tokens=s.en.split(" "); let tiles=shuffle(tokens.map((t,i)=>({t,i}))); let tt=0;
+    while(tiles.map(x=>x.t).join(" ")===s.en && tokens.length>1 && tt++<10) tiles=shuffle(tiles);
+    let picked=[], first=true, locked=false;
+    const key=t=>norm(t).replace(/[^a-z0-9']/g,"");
+    function draw(state){
+      api.frame(`<div class="prompt"><div class="pic" style="font-size:clamp(2.6rem,9vh,4rem)" aria-hidden="true">${pic(s.pic)}</div>
+        <div class="da" style="font-size:1.3rem">🇩🇰 ${esc(s.da)}</div>
+        <p class="sub" style="margin:6px 0 0">Byg sætningen på engelsk – tryk på ordene i rigtig rækkefølge</p></div>
+        <div class="wslots ${state||""}">${picked.map((n,k)=>`<button class="wt placed" data-k="${k}">${esc(tiles[n].t)}</button>`).join("")}</div>
+        <div class="wtiles">${tiles.map((x,n)=>`<button class="wt ${picked.includes(n)?"used":""}" data-n="${n}">${esc(x.t)}</button>`).join("")}</div>
+        <div class="row-btns"><button class="pill-btn" id="undo">⌫ Slet</button><button class="pill-btn" id="say">🔊 Lyt</button></div>
+        <p class="feedback" id="fb"></p>`);
+      $("#say").onclick=()=>speak(s.en,0.75);
+      if(locked) return;
+      $("#undo").onclick=()=>{ picked.pop(); draw(); };
+      app.querySelectorAll(".wtiles .wt").forEach(b=>b.onclick=()=>{ const n=+b.dataset.n; if(picked.includes(n)) return; picked.push(n); if(picked.length===tiles.length) check(); else draw(); });
+      app.querySelectorAll(".wslots .wt").forEach(b=>b.onclick=()=>{ picked.splice(+b.dataset.k,1); draw(); });
+      KEYH=e=>{ if(e.key==="Backspace"){ e.preventDefault(); picked.pop(); draw(); } };
+    }
+    function check(){
+      if(picked.map(n=>key(tiles[n].t)).join(" ")===tokens.map(key).join(" ")){
+        locked=true; draw("ok"); app.querySelectorAll(".wt,#undo").forEach(x=>x.disabled=true); SFX.ok();
+        api.answer(first?2:0, WMAP[s.blank]?s.blank:null);
+        const fb=$("#fb"); fb.className="feedback good"; fb.innerHTML=`${rand(PRAISE)}<small>${esc(s.en)}</small>`;
+        speak(s.en); KEYH=null; api.wait(2600);
+      } else {
+        first=false; SFX.bad(); draw("no");
+        let ok=0; while(ok<picked.length && key(tiles[picked[ok]].t)===key(tokens[ok])) ok++;
+        const fb=$("#fb"); fb.className="feedback bad"; fb.innerHTML=`Ikke helt.<small>De første ${ok} ord er rigtige – prøv resten igen 🔊</small>`;
+        setTimeout(()=>{ if(locked) return; picked=picked.slice(0,ok); draw(); },1300);
+      }
+    }
+    draw();
+  },
+  math(it,api){ const m=it.m;
+    if(m.words){
+      mc(api,{top:`<div class="prompt"><p class="sub" style="margin:0">What is …?</p><div class="q">${esc(m.qWords)}?</div><button class="speak" id="say">🔊 Listen</button></div>`,
+        options:m.opts, label:x=>String(x), isRight:x=>x===m.ans, right:()=>`${esc(m.qWords)} is ${numWord(m.ans)}`,
+        wrong:x=>`${x} = ${numWord(x)}`, onShow:()=>{ $("#say").onclick=()=>speak(m.qWords); speak(m.qWords); }, say:()=>speak(m.qWords+" is "+numWord(m.ans)), ms:2000});
+    } else {
+      mc(api,{top:`<div class="prompt"><p class="sub" style="margin:0">Vælg svaret på engelsk</p><div class="q" style="font-size:clamp(2.4rem,9vw,3.4rem)">${m.qDigits} = ?</div></div>`,
+        options:m.opts, three:false, label:x=>numWord(x), isRight:x=>x===m.ans, right:()=>`${m.ans} = ${numWord(m.ans)}`,
+        wrong:x=>`${numWord(x)} = ${x}`, say:()=>speak(numWord(m.ans)), ms:2000});
+    }
+  }
+};
+
+/* numbers & math */
+const ONES=["zero","one","two","three","four","five","six","seven","eight","nine","ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"];
+const TENS=["","","twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"];
+function numWord(n){ if(n<20) return ONES[n]; if(n===100) return "one hundred"; const t=Math.floor(n/10),o=n%10; return TENS[t]+(o?"-"+ONES[o]:""); }
+function mathItem(){
+  const lv = S.stats.math<15 ? 1 : S.stats.math<40 ? 2 : 3;
+  let a,b,op,ans;
+  const r=Math.random();
+  if(lv===1){ op = r<.6?"+":"-"; a=2+Math.floor(Math.random()*12); b=1+Math.floor(Math.random()*8); }
+  else if(lv===2){ op = r<.4?"+":r<.7?"-":"×"; if(op==="×"){ a=2+Math.floor(Math.random()*4); b=2+Math.floor(Math.random()*9);} else { a=10+Math.floor(Math.random()*50); b=3+Math.floor(Math.random()*30);} }
+  else { op = r<.3?"+":r<.55?"-":"×"; if(op==="×"){ a=3+Math.floor(Math.random()*8); b=3+Math.floor(Math.random()*8);} else { a=20+Math.floor(Math.random()*60); b=5+Math.floor(Math.random()*35);} }
+  if(op==="-" && b>a) [a,b]=[b,a];
+  ans = op==="+"?a+b : op==="-"?a-b : a*b;
+  if(ans>100){ op="-"; ans=a-b; if(ans<0){ [a,b]=[b,a]; ans=a-b; } }
+  const opw = op==="+"?"plus":op==="-"?"minus":"times";
+  const cand=new Set([ans]);
+  const near=[ans+1,ans-1,ans+10,ans-10,ans+2];
+  if(ans>=13&&ans<=19) near.unshift((ans-10)*10); // thirteen ↔ thirty
+  if(ans>=30&&ans<=90&&ans%10===0) near.unshift(ans/10+10);
+  for(const x of shuffle(near.slice(0,3)).concat(near.slice(3))){ if(cand.size>=4) break; if(x>=0&&x<=100) cand.add(x); }
+  while(cand.size<4) cand.add(Math.max(0,ans+Math.floor(Math.random()*20)-10));
+  return {t:"math", m:{words:Math.random()<.5, qWords:`${numWord(a)} ${opw} ${numWord(b)}`, qDigits:`${a} ${op} ${b}`, ans, opts:shuffle([...cand])}};
+}
+
+/* ================= STAGES ================= */
+function startStage(wi,s,fromMission){
+  const W=WORLDS[wi];
+  const fresh=W.list.filter(w=>!S.words[w.en]);
+  if(s===0 && fresh.length) return learnCards(W, fresh, ()=>go(()=>startStage(wi,s,fromMission)), true);
+  const old=stars(wi,s);
+  runRound({title:W.en, items:stageItems(wi,s), per:STAGES[s].per, onDone:R=>{
+    const total=8, ratio=R.perfect/total;
+    const st = ratio>=.85?3 : ratio>=.6?2 : ratio>=.4?1 : 0;
+    setStars(wi,s,st);
+    let bonus=0;
+    if(st>old){ bonus=(st-old)*5; award(bonus); }
+    const unlocked = s===0 && old===0 && st>0 && wi+1<WORLDS.length && wi+1>=2 ? WORLDS[wi+1] : null;
+    if(st>0){ SFX.up(); confetti(); }
+    save(); checkBadges();
+    const nextFn = fromMission ? missionNext : ()=>worldScreen(wi);
+    const lines=[["Rigtige i første forsøg",`${R.perfect} / ${total}`],["Point",`+${R.earned+bonus} 🪙`]];
+    if(R.best>=3) lines.push(["Bedste combo",`🔥 ${R.best}`]);
+    showResult({ic: st===3?"🏆":st>0?"⭐":"💪", stars:st,
+      title: st===3?"Perfect!":st===2?"Great work!":st===1?"Good job!":"Almost!",
+      sub: (st===0?"Du skal have mindst 4 rigtige i første forsøg for at klare banen. Prøv igen – du lærer hver gang! ":"")
+        +(unlocked?`🔓 Ny verden låst op: ${unlocked.ic} ${unlocked.en}!`:"")
+        +(bonus?` (+${bonus} 🪙 for nye stjerner)`:""),
+      lines,
+      buttons: fromMission ? [["Fortsæt missionen ▶", nextFn, true]] : [["🔁 Prøv igen",()=>startStage(wi,s,false)],["Videre ▶",nextFn,true]]});
+  }});
+}
+function showResult(o){
+  app.innerHTML = topBar(null) + `<div class="end">
+    <div class="bigstar" aria-hidden="true">${o.ic}</div>
+    ${o.stars!==undefined?`<div class="stars-big" aria-label="${o.stars} stjerner">${"★".repeat(o.stars)}<span style="opacity:.25">${"★".repeat(3-o.stars)}</span></div>`:""}
+    <h2>${esc(o.title)}</h2>
+    ${o.sub?`<p class="sub">${esc(o.sub)}</p>`:""}
+    ${o.lines?`<div class="summary">${o.lines.map(([k,v])=>`<span>${esc(k)}</span><b>${esc(v)}</b>`).join("")}</div>`:""}
+    <div class="row">${o.buttons.map(([t,f,main],i)=>`<button class="${main||o.buttons.length===1?"play":"pill-btn"}" data-b="${i}">${esc(t)}</button>`).join("")}</div></div>`;
+  app.querySelectorAll("[data-b]").forEach(b=>b.onclick=()=>{ const f=o.buttons[+b.dataset.b][1]; go(f); });
+  speak(o.title);
+  const main=o.buttons.findIndex(b=>b[2]); KEYH=e=>{ if(e.key==="Enter") go(o.buttons[main>=0?main:o.buttons.length-1][1]); };
+}
+
+function learnCards(W, list, after, isIntro){
+  let i=0, flipped=false;
+  function draw(){
+    const w=list[i];
+    app.innerHTML = topBar(isIntro?null:"Tilbage") + `<h2>${W.ic} ${isIntro?"Nye ord!":W.en}</h2>
+      <p class="sub">${isIntro?"Lyt og sig ordet højt. Derefter starter banen.":"Lyt og sig ordet højt."}</p>
+      <button class="prompt" id="card" style="width:100%" aria-label="Vis dansk">
+        <div class="pic" aria-hidden="true">${pic(w.pic)}</div><div class="word">${esc(w.en)}</div>
+        ${flipped?`<div class="da">🇩🇰 ${esc(w.da)}</div>`:`<div class="sub" style="margin:6px 0 0">Tryk for at se det på dansk</div>`}
+      </button>
+      <div style="text-align:center"><button class="speak" id="say">🔊 Listen</button></div>
+      <div class="top" style="margin-top:16px">
+        <button class="pill-btn" id="prev" ${i===0?"disabled":""}>◀</button>
+        <span class="xptext">${i+1} / ${list.length}</span>
+        <button class="pill-btn" id="next">${i===list.length-1?(isIntro?"Start banen ▶":"Færdig ✓"):"Næste ▶"}</button></div>`;
+    if(!isIntro) bindBack(after);
+    $("#card").onclick=()=>{ flipped=!flipped; draw(); };
+    $("#say").onclick=()=>speak(w.en);
+    const prev=()=>{ if(i>0){ i--; flipped=false; draw(); speak(list[i].en); } };
+    const next=()=>{ introduce(w.en); tick();
+      if(i<list.length-1){ i++; flipped=false; draw(); speak(list[i].en); }
+      else { list.forEach(x=>introduce(x.en)); save(); if(isIntro) award(list.length); after(); } };
+    $("#prev").onclick=prev; $("#next").onclick=next;
+    KEYH=e=>{ if(e.key==="ArrowRight"||e.key==="Enter") next(); else if(e.key==="ArrowLeft") prev(); else if(e.key===" "){ e.preventDefault(); flipped=!flipped; draw(); } };
+  }
+  draw(); speak(list[0].en);
+}
+
+/* ================= MAP ================= */
+function mapScreen(){
+  const ns=nextStage();
+  app.innerHTML = topBar("Hjem") + `<h2>🗺️ Worlds</h2><p class="sub">Klar bane 1 i en verden for at låse den næste op.</p>
+    <div class="worlds">${WORLDS.map((W,wi)=>{ const open=worldOpen(wi); const m=W.list.filter(w=>wordBox(w.en)>=4).length;
+      const st=[0,1,2].map(s=>stars(wi,s)).reduce((a,b)=>a+b,0);
+      return `<button class="world ${open?"":"locked"} ${open&&ns.wi===wi?"next":""}" data-w="${wi}" ${open?"":"aria-disabled=\"true\""}>
+        ${open?"":`<span class="lock">🔒</span>`}<span class="ic">${W.ic}</span><b>${esc(W.en)}</b><small>${esc(W.da)}</small>
+        <div class="st">${"★".repeat(st)}<span style="opacity:.25">${"★".repeat(9-st)}</span></div>
+        <small>${m} / ${W.list.length} ord lært</small></button>`; }).join("")}</div>`;
+  bindBack(home);
+  app.querySelectorAll("[data-w]").forEach(b=>b.onclick=()=>{ const wi=+b.dataset.w;
+    if(!worldOpen(wi)) return toast(`🔒 Klar bane 1 i ${WORLDS[wi-1].ic} ${WORLDS[wi-1].en} først`);
+    go(()=>worldScreen(wi)); });
+}
+function worldScreen(wi){
+  const W=WORLDS[wi];
+  app.innerHTML = topBar("Kortet") + `<h2>${W.ic} ${esc(W.en)}</h2><p class="sub">${esc(W.da)} · ${W.list.length} ord</p>
+    <div class="stages">${STAGES.map((S0,s)=>{ const open=stageOpen(wi,s), st=stars(wi,s);
+      return `<button class="stage" data-s="${s}" ${open?"":"disabled"}><span class="ic">${open?S0.ic:"🔒"}</span>
+        <span class="grow"><b>Bane ${s+1} · ${S0.en}</b><br><small class="xptext">${S0.da} · ${S0.per} 🪙 pr. rigtigt</small></span>
+        <span class="stars3">${"★".repeat(st)}<span style="opacity:.25">${"★".repeat(3-st)}</span></span></button>`; }).join("")}</div>
+    <button class="pill-btn" id="learn">📚 Se og hør alle ordene</button>
+    <h3 style="margin:18px 0 8px">Ordene</h3>
+    <div class="wordlist">${W.list.map(w=>{ const b=wordBox(w.en); return `<span class="wl">${pic(w.pic).replace('class="picTxt"','class="picTxt" style="font-size:.8rem;padding:0 6px;border-width:1px"')} ${esc(w.en)}<i>${b<0?"":("●".repeat(Math.min(5,b))||"○")}</i></span>`; }).join("")}</div>
+    <p class="note" style="margin-top:10px">● = hvor godt du kan ordet. 4 prikker = lært.</p>`;
+  bindBack(mapScreen);
+  app.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>go(()=>startStage(wi,+b.dataset.s,false)));
+  $("#learn").onclick=()=>go(()=>learnCards(W, W.list, ()=>worldScreen(wi), false));
+}
+
+/* ================= ARCADE ================= */
+function arcade(){
+  const hard=hardItems().length;
+  app.innerHTML = topBar("Hjem") + `<h2>🕹️ Arcade</h2><p class="sub">Bonusspil. Slå din egen rekord!</p>
+    <div class="stages">
+      <button class="stage" id="g-math"><span class="ic">🧮</span><span class="grow"><b>Math in English</b><br><small class="xptext">Regnestykker på engelsk · ${S.stats.math} klaret</small></span></button>
+      <button class="stage" id="g-speed" ${seenPool().length<6?"disabled":""}><span class="ic">⚡</span><span class="grow"><b>Speed round</b><br><small class="xptext">${seenPool().length<6?"Lær først nogle ord på kortet":"60 sekunder · rekord: "+S.best.speed}</small></span></button>
+      <button class="stage" id="g-build"><span class="ic">🧩</span><span class="grow"><b>Sentence builder</b><br><small class="xptext">Byg sætninger fra dine verdener</small></span></button>
+      <button class="stage" id="g-hard" ${hard?"":"disabled"}><span class="ic">🎯</span><span class="grow"><b>My tricky words</b><br><small class="xptext">${hard?"Øv de ord, du tit tager fejl af":"Ingen svære ord endnu – flot!"}</small></span></button>
+    </div>`;
+  bindBack(home);
+  $("#g-math").onclick=()=>go(()=>startBonus("math",false));
+  $("#g-speed").onclick=()=>go(()=>startBonus("speed",false));
+  $("#g-build").onclick=()=>go(()=>startBonus("build",false));
+  $("#g-hard").onclick=()=>go(()=>runRound({items:hardItems(), per:3, onDone:R=>showResult({ic:"🎯", title:"Nice practice!", lines:[["Rigtige",`${R.perfect} / ${hardItems().length||R.perfect}`],["Point",`+${R.earned} 🪙`]], buttons:[["🕹️ Arcade",arcade,true]]})}));
+}
+function startBonus(kind, fromMission){
+  const back = fromMission ? missionNext : arcade;
+  const endBtns = fromMission ? [["Fortsæt missionen ▶", back, true]] : [["🔁 Igen",()=>startBonus(kind,false)],["🕹️ Arcade",arcade,true]];
+  if(kind==="speed") return speedRound(res=>showResult({ic:"⚡", title: res.record?"New record!":"Time's up!", sub: res.record?"Du slog din egen rekord! 🎉":`Din rekord er ${S.best.speed}.`,
+    lines:[["Rigtige",String(res.n)],["Point",`+${res.earned} 🪙`]], buttons:endBtns}));
+  if(kind==="math") return runRound({kind:"math", items:Array.from({length:8},mathItem), per:3, onDone:R=>{ checkBadges();
+    showResult({ic:"🧮", title:R.perfect>=7?"Math genius!":"Well done!", lines:[["Rigtige i første forsøg",`${R.perfect} / 8`],["Point",`+${R.earned} 🪙`]], buttons:endBtns}); }});
+  if(kind==="build"){
+    const sents=shuffle(openWorlds().flatMap(W=>W.sentences)).slice(0,6);
+    return runRound({items:sents.map(s=>({t:"build", s})), per:4, onDone:R=>showResult({ic:"🧩", title:"Super sentences!", lines:[["Rigtige i første forsøg",`${R.perfect} / ${sents.length}`],["Point",`+${R.earned} 🪙`]], buttons:endBtns})});
+  }
+}
+function speedRound(onEnd){
+  let pool=seenPool(); if(pool.length<6) pool=openWorlds().flatMap(W=>W.list);
+  const LEN=60000; let end=Date.now()+LEN, n=0, done=false, cur=null, opts=[];
+  lastAct=Date.now();
+  app.innerHTML = `<div class="rhead"><button class="pill-btn" id="quit">✕</button><div class="timer"><i id="tbar" style="width:100%"></i></div><span class="speedcount" id="cnt">0</span></div>
+    <div class="prompt"><div class="pic" id="spic"></div></div><div class="opts" id="sopts"></div>
+    <p class="note" style="text-align:center;margin-top:14px">Tryk 1 eller 2 – eller ← →. Forkert svar koster 3 sekunder.</p>`;
+  $("#quit").onclick=()=>{ done=true; go(home); };
+  function nextQ(){
+    cur=rand(pool); const other=rand(pool.filter(x=>x.en!==cur.en && x.pic!==cur.pic)); opts=shuffle([cur,other]);
+    $("#spic").innerHTML=pic(cur.pic);
+    $("#sopts").innerHTML=opts.map((o,i)=>`<button class="opt" data-n="${i}"><kbd>${i+1}</kbd>${esc(o.en)}</button>`).join("");
+    app.querySelectorAll("#sopts .opt").forEach(b=>b.onclick=()=>pick(+b.dataset.n));
+  }
+  function pick(i){ if(done) return; tick();
+    if(opts[i].en===cur.en){ n++; SFX.ok(); $("#cnt").textContent=n; nextQ(); }
+    else { SFX.bad(); end-=3000; const b=app.querySelectorAll("#sopts .opt")[i]; b.classList.add("wrong"); b.disabled=true; } }
+  KEYH=e=>{ if(e.key==="1"||e.key==="ArrowLeft") pick(0); else if(e.key==="2"||e.key==="ArrowRight") pick(1); };
+  nextQ();
+  INTERVAL=setInterval(()=>{
+    const left=end-Date.now(); const bar=$("#tbar"); if(bar) bar.style.width=Math.max(0,left/LEN*100)+"%";
+    if(left<=0 && !done){ done=true; clearInterval(INTERVAL); KEYH=null; tick();
+      const record = n>S.best.speed; if(record) S.best.speed=n;
+      const earned=award(Math.ceil(n/2)); if(record){ confetti(); SFX.up(); } save(); checkBadges();
+      onEnd({n, earned, record}); }
+  },100);
+}
+
+/* ================= SHOP ================= */
+function shop(){
+  app.innerHTML = topBar("Hjem") + `<h2>🎁 Rewards</h2><p class="sub">Du har <b>${S.pts} 🪙</b>. Spar op, og løn ind sammen med mor eller far.</p>
+    <div class="rewards">${S.rewards.map((r,i)=>{ const can=S.pts>=r.cost;
+      return `<div class="reward"><span class="ic">${esc(r.ic||"🎁")}</span><div class="grow"><b>${esc(r.name)}</b><br><small class="xptext">${r.cost} 🪙${can?"":` · du mangler ${r.cost-S.pts}`}</small>
+        <div class="progress"><i style="width:${Math.min(100,S.pts/r.cost*100)}%"></i></div></div>
+        <button class="buy" data-r="${i}" ${can?"":"disabled"}>Løn ind</button></div>`; }).join("")}</div>
+    <p class="note" style="margin-top:14px">Mor eller far skal skrive deres kode for at godkende.</p>`;
+  bindBack(home);
+  app.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{ const r=S.rewards[+b.dataset.r];
+    parentGate(()=>{ if(S.pts<r.cost) return;
+      S.pts-=r.cost; S.log.unshift({t:Date.now(), type:"redeem", n:-r.cost, note:r.name}); save();
+      SFX.coin(); confetti(); celebrate(r.ic||"🎁","Enjoy!",r.name); checkBadges(); go(shop); },
+      `Godkend: <b>${esc(r.name)}</b> for ${r.cost} 🪙`); });
+}
+
+/* ================= TROPHIES ================= */
+function trophies(){
+  app.innerHTML = topBar("Hjem") + `<h2>🏆 Trophies</h2><p class="sub">Hvert trofæ giver +10 🪙.</p>
+    <div class="badges">${BADGES.map(b=>`<div class="badge ${S.badges[b.id]?"":"off"}"><span class="ic">${b.ic}</span><b>${esc(b.en)}</b><small>${esc(b.da)}</small></div>`).join("")}</div>`;
+  bindBack(home);
+}
+
+/* ================= PARENTS ================= */
+async function hashPin(pin){
+  const txt="englishfun:"+pin;
+  try{ const buf=await crypto.subtle.digest("SHA-256", new TextEncoder().encode(txt)); return [...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join(""); }
+  catch(e){ let h=5381; for(const c of txt) h=((h<<5)+h+c.charCodeAt(0))>>>0; return "d"+h.toString(16); }
+}
+function parentGate(onOk, why){
+  if(!S.pin){
+    return modal(`<div class="ic">👪</div><h3>Lav en forældrekode</h3><p class="note">${why?why+"<br>":""}Vælg en kode på 4 cifre. Den skal bruges, når point skal løses ind.</p>
+      <input id="p1" inputmode="numeric" maxlength="4" type="password" autocomplete="off" placeholder="····"><br><input id="p2" inputmode="numeric" maxlength="4" type="password" autocomplete="off" placeholder="gentag">
+      <p class="feedback bad" id="pe" style="min-height:1.4em;font-size:1rem"></p><div class="row"><button class="pill-btn" data-c>Annullér</button><button class="play" style="padding:10px 20px" data-o>Gem kode</button></div>`,
+      (m,close)=>{ m.querySelector("[data-c]").onclick=close;
+        const ok=async()=>{ const a=m.querySelector("#p1").value, b=m.querySelector("#p2").value;
+          if(!/^\d{4}$/.test(a)) return m.querySelector("#pe").textContent="Koden skal være 4 cifre";
+          if(a!==b) return m.querySelector("#pe").textContent="Koderne er ikke ens";
+          S.pin=await hashPin(a); save(); close(); onOk(); };
+        m.querySelector("[data-o]").onclick=ok; m.querySelector("#p2").onkeydown=e=>{ if(e.key==="Enter") ok(); }; });
+  }
+  modal(`<div class="ic">🔐</div><h3>Mor eller far</h3><p class="note">${why||"Skriv forældrekoden"}</p>
+    <input id="p1" inputmode="numeric" maxlength="4" type="password" autocomplete="off" placeholder="····">
+    <p class="feedback bad" id="pe" style="min-height:1.4em;font-size:1rem"></p><div class="row"><button class="pill-btn" data-c>Annullér</button><button class="play" style="padding:10px 20px" data-o>OK</button></div>`,
+    (m,close)=>{ m.querySelector("[data-c]").onclick=close; const inp=m.querySelector("#p1");
+      const ok=async()=>{ if(await hashPin(inp.value)===S.pin){ close(); onOk(); } else { m.querySelector("#pe").textContent="Forkert kode"; inp.value=""; inp.focus(); } };
+      m.querySelector("[data-o]").onclick=ok; inp.onkeydown=e=>{ if(e.key==="Enter") ok(); }; });
+}
+
+let ptab="overview";
+function parent(){
+  const tabs=[["overview","Overblik"],["rewards","Belønninger"],["points","Point"],["backup","Backup"]];
+  let body="";
+  if(ptab==="overview"){
+    const d0=DAY(), days=[...Array(7)].map((_,k)=>d0-6+k);
+    const maxMin=Math.max(10,...days.map(d=>(S.days[d]?.sec||0)/60));
+    const wd=["søn","man","tir","ons","tor","fre","lør"];
+    const hard=seenPool().filter(w=>S.words[w.en].x>0).sort((a,b)=>S.words[b.en].x-S.words[a.en].x).slice(0,10);
+    const intro=Object.keys(S.words).length;
+    const week=days.reduce((a,d)=>a+(S.days[d]?.sec||0),0)/60;
+    const n=days.reduce((a,d)=>a+(S.days[d]?.n||0),0), ok=days.reduce((a,d)=>a+(S.days[d]?.ok||0),0);
+    body=`<div class="panel"><h3>${esc(S.name)} lige nu</h3><div class="kv">
+      <div><b>🪙 ${S.pts}</b><small>point at bruge</small></div><div><b>Lv ${lvlOf(S.xp)}</b><small>${S.xp} XP i alt</small></div>
+      <div><b>🔥 ${S.streak.last>=d0-1?S.streak.n:0}</b><small>dage i træk</small></div><div><b>${mastered()} / ${intro}</b><small>ord lært / mødt</small></div>
+      <div><b>${Math.round(week)} min</b><small>de sidste 7 dage</small></div><div><b>${n?Math.round(ok/n*100):0} %</b><small>rigtige i 1. forsøg (7 dage)</small></div>
+      <div><b>${S.stats.missions}</b><small>missioner i alt</small></div><div><b>${openWorlds().length} / ${WORLDS.length}</b><small>verdener åbne</small></div></div></div>
+      <div class="panel"><h3>Minutter pr. dag</h3><div class="bars">${days.map(d=>{ const m=(S.days[d]?.sec||0)/60; const dt=new Date(d*864e5);
+        return `<div class="b"><em>${Math.round(m)}</em><i style="height:${m/maxMin*85}%"></i><span>${wd[dt.getUTCDay()]}</span></div>`; }).join("")}</div>
+        <p class="note">Tiden tælles kun, mens han svarer (højst 30 sek. mellem to svar).</p></div>
+      <div class="panel"><h3>Sværeste ord</h3>${hard.length?`<div class="wordlist">${hard.map(w=>`<span class="wl">${esc(w.en)} = ${esc(w.da)} <i style="color:var(--berry)">✗${S.words[w.en].x}</i></span>`).join("")}</div>`:`<p class="note">Ingen endnu.</p>`}</div>`;
+  }
+  if(ptab==="rewards"){
+    body=`<div class="panel"><h3>Belønninger</h3><p class="note">Ret navn, emoji og pris. En typisk mission giver cirka 60–90 point.</p>
+      <div id="rw">${S.rewards.map((r,i)=>`<div class="field"><input class="num" style="width:56px" value="${esc(r.ic||"🎁")}" data-i="${i}" data-f="ic"><input class="name" value="${esc(r.name)}" data-i="${i}" data-f="name"><input class="num" type="number" min="1" value="${r.cost}" data-i="${i}" data-f="cost"><button class="btn ghost" data-del="${i}">Slet</button></div>`).join("")}</div>
+      <div class="field"><button class="btn ghost" id="add">+ Tilføj</button><button class="btn" id="saveR">Gem</button></div></div>`;
+  }
+  if(ptab==="points"){
+    body=`<div class="panel"><h3>Point-loft pr. dag</h3><p class="note">Højst så mange point pr. dag (XP er ubegrænset). Det forhindrer, at han “farmer” point på lette baner.</p>
+      <div class="field"><input class="num" type="number" min="10" id="cap" value="${S.cap}"><button class="btn" id="saveCap">Gem</button></div></div>
+      <div class="panel"><h3>Giv eller træk point</h3><div class="field"><input class="num" type="number" id="adj" placeholder="fx 20 eller -20"><input class="name" id="adjn" placeholder="Hvorfor? (fx flot lektie)"><button class="btn" id="doAdj">OK</button></div></div>
+      <div class="panel"><h3>Historik</h3><div class="loglist">${S.log.length?S.log.slice(0,30).map(l=>`<div><span>${new Date(l.t).toLocaleDateString("da-DK")} · ${l.type==="redeem"?"🎁 ":"✏️ "}${esc(l.note||"")}</span><b>${l.n>0?"+":""}${l.n}</b></div>`).join(""):`<p class="note">Intet endnu.</p>`}</div></div>`;
+  }
+  if(ptab==="backup"){
+    body=`<div class="panel"><h3>Backup</h3>
+      <p class="note">Alt gemmes i browseren på denne computer. Hvis browserdata bliver slettet (fx ved nulstilling af en skole-Chromebook), forsvinder det. Tag en backup en gang imellem. Den kan også indlæses på en anden computer.</p>
+      <p class="note">Sidste backup: <b>${S.backupAt?new Date(S.backupAt).toLocaleString("da-DK"):"aldrig"}</b></p>
+      <div class="field"><button class="btn" id="dl">⬇️ Download backup-fil</button><button class="btn ghost" id="cp">📋 Kopiér gemmekode</button></div>
+      <textarea id="code" readonly></textarea></div>
+      <div class="panel"><h3>Indlæs backup</h3><p class="note">Indsæt en gemmekode, eller vælg en backup-fil. Det erstatter alt på denne computer.</p>
+      <textarea id="imp" placeholder="EF2:…"></textarea><div class="field"><input type="file" id="file" accept=".txt,text/plain"><button class="btn" id="doImp">Indlæs</button></div></div>
+      <div class="panel"><h3>Andet</h3><div class="field"><button class="btn ghost" id="newPin">Skift forældrekode</button><button class="btn ghost" id="rename">Skift navn</button><button class="btn danger" id="reset">Nulstil alt</button></div></div>`;
+  }
+  app.innerHTML = topBar("Hjem") + `<h2>👪 Mor og far</h2><p class="sub">Overblik, belønninger og backup.</p>
+    <div class="tabs">${tabs.map(([k,l])=>`<button class="${ptab===k?"on":""}" data-t="${k}">${l}</button>`).join("")}</div>${body}`;
+  bindBack(home);
+  app.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{ ptab=b.dataset.t; parent(); });
+  if(ptab==="rewards"){
+    const collect=()=>{ app.querySelectorAll("#rw input").forEach(inp=>{ const r=S.rewards[+inp.dataset.i]; if(!r) return; const f=inp.dataset.f; r[f]= f==="cost" ? Math.max(1,parseInt(inp.value,10)||1) : inp.value.trim(); }); };
+    app.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{ collect(); S.rewards.splice(+b.dataset.del,1); save(); parent(); });
+    $("#add").onclick=()=>{ collect(); S.rewards.push({ic:"🎁",name:"Ny belønning",cost:50}); save(); parent(); };
+    $("#saveR").onclick=()=>{ collect(); S.rewards=S.rewards.filter(r=>r.name); save(); toast("Gemt ✓"); parent(); };
+  }
+  if(ptab==="points"){
+    $("#saveCap").onclick=()=>{ S.cap=Math.max(10,parseInt($("#cap").value,10)||150); save(); toast("Gemt ✓"); };
+    $("#doAdj").onclick=()=>{ const n=parseInt($("#adj").value,10); if(!n) return; S.pts=Math.max(0,S.pts+n); if(n>0) S.xp+=n;
+      S.log.unshift({t:Date.now(), type:"adj", n, note:$("#adjn").value.trim()||"Justering"}); save(); toast(`${n>0?"+":""}${n} 🪙`); parent(); };
+  }
+  if(ptab==="backup"){
+    const code=makeCode(); $("#code").value=code;
+    const mark=()=>{ S.backupAt=Date.now(); save(); };
+    $("#cp").onclick=async()=>{ try{ await navigator.clipboard.writeText(code); toast("Kopieret ✓"); }catch(e){ $("#code").select(); toast("Markeret – tryk Ctrl+C"); } mark(); };
+    $("#dl").onclick=()=>{ const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([code],{type:"text/plain"}));
+      a.download=`english-fun-backup-${new Date().toISOString().slice(0,10)}.txt`; document.body.appendChild(a); a.click(); a.remove(); mark(); toast("Downloadet ✓"); };
+    $("#file").onchange=async e=>{ const f=e.target.files[0]; if(f) $("#imp").value=(await f.text()).trim(); };
+    $("#doImp").onclick=async()=>{ const o=await readCode($("#imp").value.trim()); if(!o) return toast("⚠️ Koden er ugyldig");
+      confirmBox(`Erstat alt med backup (${esc(o.name)}, ${o.pts} 🪙, level ${lvlOf(o.xp)})?`,"Indlæs",()=>{ S=Object.assign(fresh(),o); save(); toast("Backup indlæst ✓"); go(home); }); };
+    $("#newPin").onclick=()=>{ S.pin=null; parentGate(()=>toast("Ny kode gemt ✓")); };
+    $("#rename").onclick=()=>modal(`<h3>Navn</h3><input class="wide" id="nm" maxlength="20" value="${esc(S.name)}"><div class="row"><button class="play" style="padding:10px 20px" data-o>Gem</button></div>`,
+      (m,close)=>{ m.querySelector("[data-o]").onclick=()=>{ const v=m.querySelector("#nm").value.trim(); if(v){ S.name=v; save(); } close(); }; });
+    $("#reset").onclick=()=>modal(`<h3>Nulstil alt?</h3><p class="note">Alle point, ord og stjerner slettes. Skriv NULSTIL for at bekræfte.</p><input class="wide" id="rs"><div class="row"><button class="btn danger" data-o>Nulstil</button></div>`,
+      (m,close)=>{ m.querySelector("[data-o]").onclick=()=>{ if(m.querySelector("#rs").value.trim().toUpperCase()==="NULSTIL"){ S=fresh(); save(); close(); go(home); } }; });
+  }
+}
+function sum32(s){ let h=2166136261; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,16777619)>>>0; } return h.toString(36); }
+function makeCode(){ const j=JSON.stringify(S); const b=btoa(unescape(encodeURIComponent(j))); return "EF2:"+b+":"+sum32("ef2"+j); }
+async function readCode(c){
+  try{ const m=c.match(/^EF2:([A-Za-z0-9+/=]+):([a-z0-9]+)$/); if(!m) return null;
+    const j=decodeURIComponent(escape(atob(m[1]))); if(sum32("ef2"+j)!==m[2]) return null;
+    const o=JSON.parse(j); return o&&o.v===2 ? o : null; }catch(e){ return null; }
+}
+
+/* ================= START ================= */
+document.addEventListener("visibilitychange",()=>{ if(document.hidden){ save(); lastAct=0; } });
+home();
+</script>
+</body>
+</html>
